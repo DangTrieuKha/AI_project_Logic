@@ -1,0 +1,15 @@
+Movement strategy 1:
+- If the current cell is only containing Stench, then shoot the arrow to one next cell which is not visited yet, then move to that cell.
+    - Assume the current cell is (x, y), then the next cell is (x+1, y). The agent will shoot the arrow to (x+1, y) and move to (x+1, y).
+    - If no Scream appear, then the Wumpus is not in (x+1, y), the agent will be safe to move to (x+1, y)
+    - Now we can assume the Wumpus is in (x, y+1). If the current cell still contains Stench, then the agent will shoot the arrow to (x+1, y+1) and move to (x+1, y+1).
+    - If (x+1, y+1) is not containing Stench, then the Wumpus is in (x-1, y). The agent will be safe to move to (x, y+1).
+    - If (x+1, y+1) is containing Stench, then the Wumpus maybe in (x+2, y+1) and/or (x, y+1) and/or (x+1, y+2). The agent will shoot the arrow to (x+2, y+1) and move to (x+2, y+1).
+    - Continue checking process until the agent finish exploring the map.
+- If the current cell is containing Stench and Breeze/Whiff, then shoot the arrow to next cells which is not visited yet until a Scream appear, then move to that cell.
+    - After move to the cell which the Scream appear, if there is no Stench, go around the location to find the Pit.
+    - If there is still Stench, continue the checking process above.
+- If the current cell is only containing Breeze/Whiff, then move to the next cell which is not visited yet, and go back if necessary and having enough information.
+- If the current cell is only containing Glow, then move around to find the Healing Potion.
+- If the current cell is containing Glow and Breeze/Whiff, then move to the next cell which is not visited yet, and go back if necessary and having enough information.
+- If the current cell is containing Glow and Stench, then shoot the arrow to next cells which is not visited yet until a Scream appear and no Stench remain, then move to other cell to look for the Healing Potion.
