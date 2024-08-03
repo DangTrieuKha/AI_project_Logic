@@ -162,7 +162,6 @@ class App:
         self.canvas = Canvas(self.map_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
         self.canvas.pack(pady=(10, 10))
 
-        self.player_position = self.program.start
         self.draw_grid()
         self.draw_elements()
 

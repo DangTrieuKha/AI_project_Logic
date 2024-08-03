@@ -2,15 +2,6 @@ class Program:
     def __init__(self, map_file):
         self.map = self.load_map(map_file)
         self.update_percepts()
-        rows = len(self.map)
-        cols = len(self.map[0])
-        for i in range(rows):
-            for j in range(cols):
-                if self.map[i][j] == 'G':
-                    self.end = (i, j)
-                if self.map[i][j] == 'A':
-                    self.start = (i, j)
-        print(self.map)
 
     def load_map(self, map_file):
         with open(map_file, 'r') as file:
