@@ -42,45 +42,119 @@ class AgentKB:
 
     def tell(self, percepts):
         for percept in percepts:
-            if percept == 'Breeze':
+            if percept == 'B':
                 x, y = percepts[percept]
                 # Breeze tại (x, y) -> Pit tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
-                self.add_clause([self.pos_literal(x-1, y), self.pos_literal(x+1, y), 
-                                 self.pos_literal(x, y-1), self.pos_literal(x, y+1)])
-            elif percept == 'Stench':
+                self.add_clause([self.pos_literal_pit(x-1, y), self.pos_literal_pit(x+1, y), 
+                                 self.pos_literal_pit(x, y-1), self.pos_literal_pit(x, y+1)])
+            elif percept == 'S':
                 x, y = percepts[percept]
                 # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
                 self.add_clause([self.pos_literal_wumpus(x-1, y), self.pos_literal_wumpus(x+1, y), 
                                  self.pos_literal_wumpus(x, y-1), self.pos_literal_wumpus(x, y+1)])
+            elif percept == 'W_H':
+                x, y = percepts[percept]
+                # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
+                self.add_clause([self.pos_literal_poison(x-1, y), self.pos_literal_poison(x+1, y), 
+                                 self.pos_literal_poison(x, y-1), self.pos_literal_poison(x, y+1)])
+            elif percept == 'G_L':
+                x, y = percepts[percept]
+                # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
+                self.add_clause([self.pos_literal_healing(x-1, y), self.pos_literal_healing(x+1, y), 
+                                 self.pos_literal_healing(x, y-1), self.pos_literal_healing(x, y+1)])
+            elif percept == 'P':
+                x, y = percepts[percept]
+                self.add_clause([self.pos_literal_pit(x,y)])
+            elif percept == 'W':
+                x, y = percepts[percept]
+                self.add_clause([self.pos_literal_wumpus(x,y)])
+            elif percept == 'P_G':
+                x, y = percepts[percept]
+                self.add_clause([self.pos_literal_poison(x,y)])
+            elif percept == 'H_P':
+                x, y = percepts[percept]
+                self.add_clause([self.pos_literal_healing(x,y)])
 
-    def pos_literal(self, x, y):
+                
+
+
+    # Khẳng định
+    def pos_literal_pit(self, x, y):
         # Chuyển (x, y) thành literal tích cực cho Pit
         return (x * 10 + y) + 1  # Thêm 1 để đảm bảo các literals không trùng lặp
 
     def pos_literal_wumpus(self, x, y):
         # Chuyển (x, y) thành literal tích cực cho Wumpus
         return (x * 10 + y) + 100  # Offset bởi 100 để phân biệt với literals của Pit
-
-    def neg_literal(self, x, y):
+    def pos_literal_poison(self, x, y):
+        # Chuyển (x, y) thành literal tích cực cho poison
+        return (x * 10 + y) + 200
+    def pos_literal_healing(self, x, y):
+        # Chuyển (x, y) thành literal tích cực cho poison
+        return (x * 10 + y) + 300  
+    
+    # Phủ định
+    def neg_literal_pit(self, x, y):
         # Chuyển (x, y) thành literal âm cho Pit
-        return -self.pos_literal(x, y)
-
+        return -self.pos_literal_pit(x, y)
     def neg_literal_wumpus(self, x, y):
         # Chuyển (x, y) thành literal âm cho Wumpus
         return -self.pos_literal_wumpus(x, y)
+    def neg_literal_poison(self, x, y):
+        # Chuyển (x, y) thành literal âm cho Wumpus
+        return -self.pos_literal_poison(x, y)
+    def neg_literal_healing(self, x, y):
+        # Chuyển (x, y) thành literal âm cho Wumpus
+        return -self.pos_literal_healing(x, y)
 
+    # Truy vấn
     def is_there_pit(self, x, y):
         # Kiểm tra liệu có chắc chắn có Pit tại (x, y)
-        query_pit = [self.pos_literal(x, y)]
+        query_pit = [self.pos_literal_pit(x, y)]
         result_pit = self.ask(query_pit)
         return result_pit  # Trả về True nếu có Pit tại (x, y), False nếu không biết
+    def is_there_not_pit(self, x,y):
+        query_pit = [self.neg_literal_pit(x, y)]
+        result_pit = self.ask(query_pit)
+        return result_pit  # Trả về True nếu ko có Pit tại (x, y), False nếu không biết
+    def is_there_wumpus(self, x,y):
+        query = [self.pos_literal_wumpus(x, y)]
+        result = self.ask(query)
+        return result
+    def is_there_not_wumpus(self, x,y):
+        query = [self.neg_literal_wumpus(x, y)]
+        result = self.ask(query)
+        return result
+    def is_there_poison(self, x, y):
+        query = [self.pos_literal_poison(x, y)]
+        result = self.ask(query)
+        return result
+    def is_there_not_poison(self, x, y):
+        query = [self.neg_literal_poison(x, y)]
+        result = self.ask(query)
+        return result
+    def is_there_healing(self, x, y):
+        query = [self.pos_literal_healing(x, y)]
+        result = self.ask(query)
+        return result
+    def is_there_not_healing(self, x, y):
+        query = [self.neg_literal_healing(x, y)]
+        result = self.ask(query)
+        return result
+
+
+        
+
+    
+
 
 # Khởi tạo Agent KB
 agent_kb = AgentKB()
 
-# Thêm các quy tắc ban đầu vào KB
-agent_kb.tell({'Breeze': (1, 1)})
-agent_kb.add_clause([agent_kb.pos_literal(1, 2)])
+# Thêm nhận thức: có Breeze tại ô (1,1)
+agent_kb.tell({'B': (1, 1)})
+# Thêm nhận thức: tại ô (1,2) có pit
+agent_kb.tell({'P': (1,2)})
 
 # Kiểm tra liệu có Pit tại (1,2)
 result_pit = agent_kb.is_there_pit(1, 2)
