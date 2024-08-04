@@ -1,18 +1,36 @@
-Movement strategy 1:
-- If the current cell is only containing Stench, then shoot the arrow to one next cell which is not visited yet, then move to that cell.
-    - Assume the current cell is (x, y), then the next cell is (x+1, y). The agent will shoot the arrow to (x+1, y) and move to (x+1, y).
-    - If no Scream appear, then the Wumpus is not in (x+1, y), the agent will be safe to move to (x+1, y)
-    - Now we can assume the Wumpus is in (x, y+1). If the current cell still contains Stench, then the agent will shoot the arrow to (x+1, y+1) and move to (x+1, y+1).
-    - If (x+1, y+1) is not containing Stench, then the Wumpus is in (x-1, y). The agent will be safe to move to (x, y+1).
-    - If (x+1, y+1) is containing Stench, then the Wumpus maybe in (x+2, y+1) and/or (x, y+1) and/or (x+1, y+2). The agent will shoot the arrow to (x+2, y+1) and move to (x+2, y+1).
+Movement strategy 1 (Phát):
+- x, y: current position with (1, 1) is the bottom-left corner.
+
+- If the current cell is only containing Stench, then shoot the arrow to one next cell in the front [-100] which is not visited yet, then move to that cell.
+    - Assume the current cell is (x, y), then the next cell is (x+1, y). The agent will shoot the arrow to (x+1, y) and move to (x+1, y). [-110]: Shoot an arrow [-100], move forward [-10]
+        - If Scream appear, update map and continue exploring the map.
+        - If no Scream appear, then the Wumpus is not in (x+1, y), the agent will be safe to move to (x+1, y). And the Wumpus maybe in (x, y-1) or (x, y+1) (then use KB to update the information).
+    - Now we can assume the Wumpus is in (x, y+1), and if the current cell still contains Stench, then the agent will shoot the arrow to (x+1, y+1) and move to (x+1, y+1). [-120]: Turn left [-10], shoot an arrow [-100], move forward [-10]
+        - If Scream appear, update map and continue exploring the map.
+        - If no Scream appear, then the Wumpus is not in (x+1, y+1), the agent will be safe to move to (x+1, y+1)
+    - If (x+1, y+1) is not containing Stench, then the Wumpus is in (x, y-1). The agent will be safe to move to (x, y+1).
+    - If (x+1, y+1) is containing Stench, then the Wumpus maybe in (x+2, y+1) and/or (x, y+1) and/or (x+1, y+2). The agent will shoot the arrow to (x+1, y+2) and move to (x+1, y+2). [-110]: Shoot an arrow [-100], move forward [-10]
+        - If Scream appear, update map and continue exploring the map.
+        - If no Scream appear, then the Wumpus is not in (x+1, y+2), the agent will be safe to move to (x+1, y+2)
     - Continue checking process until the agent finish exploring the map.
-- If the current cell is containing Stench and Breeze/Whiff, then shoot the arrow to next cells which is not visited yet until a Scream appear, then move to that cell.
-    - After move to the cell which the Scream appear, if there is no Stench, go around the location to find the Pit.
-    - If there is still Stench, continue the checking process above.
+
 - If the current cell is only containing Breeze/Whiff, then move to the next cell which is not visited yet, and go back if necessary and having enough information.
-- If the current cell is only containing Glow, then move around to find the Healing Potion.
-- If the current cell is containing Glow and Breeze/Whiff, then move to the next cell which is not visited yet, and go back if necessary and having enough information.
-- If the current cell is containing Glow and Stench, then shoot the arrow to next cells which is not visited yet until a Scream appear and no Stench remain, then move to other cell to look for the Healing Potion.
+
+- If the current cell is only containing Glow, then move around to find the Healing Potion. [-10] - [-100]: move forward [-10], turn around [-20], move forward [-10], turn left | turn right [-10], move forward [-10], turn around [-20], move forward[-10], move forward[-10]
+
+- If the current cell (x, y) is containing Stench and Breeze/Whiff, then shoot the arrow to next cells which is not visited yet until a Scream appear, then move to that cell. [-110] - [-340]: Shoot an arrow [-100], turn left | turn right [-10], shoot an arrow[-100], turn around [-20], shoot an arrow [-100], move forward [-10]
+    - After move to the cell which the Scream appear, if there is no Stench, update KB there is 1-2 Pit in two other cells.
+    - If there is still Stench and/or Breeze, continue the checking process above.
+
+- If the current cell is containing Glow and Breeze/Whiff, then move to the next cell which is not visited yet, and go back if necessary and having enough information. [-10]: move forward [-10]
+
+- If the current cell is containing Glow and Stench, then shoot the arrow to next cells which is not visited yet until (a Scream appear and no Stench remain) or shoot 2 time, then update the Wumpus location and move to other cell to look for the Healing Potion.
+    - If there is 1 Wumpus (the above condition): [-120] - [-220]:
+        - Scream appear at first arrow [-120] - [-160]: Shoot an arrow [-100], turn left | turn right [-10], move forward [-10], turn around [-20], move forward [-10], move forward [-10]
+        - Scream appear at second arrow [-220] - [-320]: Shoot an arrow [-100], turn left | turn right [-10], shoot an arrow [-100], move forward [-10], turn around [-20], move forward [-10], turn right | turn left [-10], move forward [-10], turn around [-20], move forward [-10], turn left | turn right [-10], move forward [-10]
+        - No scream appear, then the Wumpus is in the remaining cell [-220] - [-270]: Shoot an arrow [-100], turn left | turn right [-10], shoot an arrow [-100], move forward [-10], turn around [-20], move forward [-10], turn left | turn right [-10], move forward [-10]
+            - If still no Potion, then the Potion is in the same cell with the Wumpus, update KB and return to get if necessary.
+    - If there are more than 1 Wumpus (a Scream appear but Stench remain): Shoot all direction and update the KB, then move to all cell to look for the Healing Potion. [-340] - [-440]: Shoot an arrow [-100], turn left | turn right [-10], shoot an arrow [-100], turn around [-20], shoot an arrow [-100], move forward [-10], turn around [-20], move forward [-10], turn left | turn right [-10], move forward [-10], turn around [-20], move forward [-10], turn left | turn right [-10], move forward [-10]
 
 Strat của Hoàng:
 1. Xử lý Wumpus trong phạm vi 3 ô xung quanh mình
