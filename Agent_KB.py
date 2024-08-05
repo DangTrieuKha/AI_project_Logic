@@ -40,38 +40,112 @@ class AgentKB:
                 return False  # Không có mâu thuẫn, không thể suy ra query
             clauses.extend(new)
 
+    def isValid(self,x,y):
+        if x >= 1 and x <= 10 and y>=1 and y <= 10:
+            return True
+        return False
+    
+    #This function use to add a negative clause to KB. 
+    #Because when add negative clause to KB can lead to conflict. parameter clause has form as: self.neg_literrial_...(x,y)
+    def do_negative_clause(self, clause):
+        new_kb = CNF()
+        pos_clause = -clause
+
+        for k in self.kb.clauses:
+            if pos_clause in k:
+                new_clause = [lit for lit in k if lit != pos_clause]
+                if new_clause:
+                    new_kb.append(new_clause)
+            else:
+                new_kb.append(k)
+
+        new_kb.append([clause])
+        self.kb = new_kb
+
+
+
     def tell(self, percepts, x,y):
-        
+        dx = [-1, 1, 0, 0]
+        dy = [0,0,-1,1]
         if 'B' in percepts:
-            self.add_clause([self.pos_literal_pit(x-1, y), self.pos_literal_pit(x+1, y), 
-                                 self.pos_literal_pit(x, y-1), self.pos_literal_pit(x, y+1)])
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    tmp.append(self.pos_literal_pit(x_new, y_new))
+            self.add_clause(tmp)
+        else:
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.do_negative_clause(self.neg_literal_pit(x_new,y_new))
+
                 
                 
         if 'S' in percepts:
              # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
-            self.add_clause([self.pos_literal_wumpus(x-1, y), self.pos_literal_wumpus(x+1, y), 
-                                 self.pos_literal_wumpus(x, y-1), self.pos_literal_wumpus(x, y+1)])
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    tmp.append(self.pos_literal_wumpus(x_new, y_new))
+            self.add_clause(tmp)
+        else:
+            
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.do_negative_clause(self.neg_literal_wumpus(x_new,y_new))
                 
                 
         if 'W_H' in percepts:
-            self.add_clause([self.pos_literal_poison(x-1, y), self.pos_literal_poison(x+1, y), 
-                                 self.pos_literal_poison(x, y-1), self.pos_literal_poison(x, y+1)])
+            
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    tmp.append(self.pos_literal_poison(x_new, y_new))
+            self.add_clause(tmp)
+        else:
+            
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.do_negative_clause(self.neg_literal_poison(x_new,y_new))
                 
                 
         if 'G_L' in percepts:
-            self.add_clause([self.pos_literal_healing(x-1, y), self.pos_literal_healing(x+1, y), 
-                                 self.pos_literal_healing(x, y-1), self.pos_literal_healing(x, y+1)])
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    tmp.append(self.pos_literal_healing(x_new, y_new))
+            self.add_clause(tmp)
+        else:
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.do_negative_clause(self.neg_literal_healing(x_new, y_new))
+
                 
                 
         if 'P' in percepts:
             self.add_clause([self.pos_literal_pit(x,y)])
         else:
-            self.add_clause([self.neg_literal_pit(x,y)])
+            self.do_negative_clause(self.neg_literal_pit(x,y))
 
         if 'W' in percepts:
             self.add_clause([self.pos_literal_wumpus(x,y)])
         else:
-            self.add_clause([self.neg_literal_wumpus(x,y)])
+            self.do_negative_clause(self.neg_literal_wumpus(x,y))
                 
                 
                 
@@ -80,13 +154,13 @@ class AgentKB:
         if  'P_G' in percepts:
             self.add_clause([self.pos_literal_poison(x,y)])
         else:
-            self.add_clause([self.neg_literal_poison(x,y)])
+            self.do_negative_clause(self.neg_literal_poison(x,y))
     
                 
         if 'H_P' in percepts:
             self.add_clause([self.pos_literal_healing(x,y)])
         else:
-            self.add_clause([self.neg_literal_healing(x,y)])
+            self.do_negative_clause(self.neg_literal_healing(x,y))
 
                 
 
@@ -161,16 +235,31 @@ class AgentKB:
     
 
 
-# Khởi tạo Agent KB
+# # Khởi tạo Agent KB
+# agent_kb = AgentKB()
+
+# # Thêm nhận thức: có Breeze tại ô (1,1)
+# agent_kb.tell('',1,1)
+# # Thêm nhận thức: tại ô (1,2) có pit
+# agent_kb.tell('B',1,2)
+# agent_kb.tell('',2,2)
+# agent_kb.tell('B S',2,3)
+# # Kiểm tra liệu có Pit tại (1,2)
+# result_pit = agent_kb.is_there_pit(1, 3)
+# print(f"Is there a pit at (1,3)? {'Yes' if result_pit else 'do not know'}")
+
 agent_kb = AgentKB()
+agent_kb.tell('S', 2, 3)
+agent_kb.tell('S', 3, 4)
+agent_kb.tell('S', 4, 3)
+agent_kb.tell('S', 3, 2)
 
-# Thêm nhận thức: có Breeze tại ô (1,1)
-agent_kb.tell('B',1,1)
-# Thêm nhận thức: tại ô (1,2) có pit
-agent_kb.tell('P',1,2)
+print(f"Is there a wumpus at (3,3)? {agent_kb.is_there_wumpus(3, 3)}")
 
-# Kiểm tra liệu có Pit tại (1,2)
-result_pit = agent_kb.is_there_pit(1, 2)
-print(f"Is there a pit at (1,2)? {'Yes' if result_pit else 'do not know'}")
-result_pit = agent_kb.is_there_not_pit(1, 1)
-print(f"Is there a pit at (1,1)? {'Yes' if result_pit else 'do not know'}")
+agent_kb.tell('', 1, 2)
+# agent_kb.tell('', 2, 4)
+agent_kb.tell('', 1, 4)
+# agent_kb.tell('', 5, 3)
+# agent_kb.tell('', 4, 4)
+
+print(f"Is there a wumpus at (3,3)? {agent_kb.is_there_wumpus(3, 3)}")
