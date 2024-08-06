@@ -3,7 +3,8 @@
 - GUI: hiện được bản đồ: Trân [x]
 - Chiến lược chọn nước đi - Ý tưởng : Phát, Hoàng
     - Phát: [x]
-    - Hoàng [x]
+    - Hoàng [x]  
+    
 `Giai đoạn 2`: 6/8 - 10/8
 - Xử lí cập nhật lại map sau mỗi action (update_map() trong program): `Kha` []
 - Tiếp tục hoàn thiện kb: `Kha` []
