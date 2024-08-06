@@ -71,7 +71,44 @@ class Program:
         return self.map[self.agent_action.get_position()[0]][self.agent_action.get_position()[1]]
     
     def update_map(self):
-        pass
+        x,y = self.agent_action.position
+        x_map = 10 - x
+        y_map = y - 1
+        direction = self.agent_action.direction
+        if self.agent_action.actions['GRAB']:
+            adjacent = self.get_adjacent_cells(x_map,y_map)
+            if 'H_P' in self.map[x_map][y_map]:
+                self.map[x_map][y_map].remove('H_P')
+            for i,j in adjacent:
+                if 'G_L' in self.map[x_map][y_map]:
+                    self.map[x_map][y_map].remove('G_L')
+        elif self.agent_action.actions['SHOOT']:
+            if direction == 'UP':
+                x_wumpus = x_map
+                y_wumpus = y_map - 1
+            elif direction == 'DOWN':
+                x_wumpus = x_map
+                y_wumpus = y_map + 1
+            elif direction == 'LEFT':
+                x_wumpus = x_map - 1
+                y_wumpus = y_map
+            elif direction == 'RIGHT':
+                x_wumpus = x_map + 1
+                y_wumpus = y_map
+            
+            if x_wumpus >= 0 and x_wumpus <= 9 and y_wumpus >=0 and y_wumpus <= 9:
+                if 'W' in self.map[x_wumpus][y_wumpus]:
+                    self.map[x_wumpus][y_wumpus].remove('W')
+                adjacent = self.get_adjacent_cells(x_wumpus, y_wumpus)
+                for i,j in adjacent:
+                    if 'S' in self.map[i][j]:
+                        self.map[i][j].remove('S')
+        
+
+
+            
+
+
 
     def update_score(self, value):
         self.agent_score += value
@@ -90,13 +127,13 @@ class Program:
         elif actions['SHOOT']:
             self.update_score(-100)
             self.update_map()
-            self.update_percepts()
+            #self.update_percepts()
         elif actions['GRAB']:
             self.update_score(-10)
             if self.map[self.agent_action.get_position()[0]][self.agent_action.get_position()[1]] == 'G':
                 self.update_score(5000)
             self.update_map()
-            self.update_percepts()
+            #self.update_percepts()
         elif actions['TURN_LEFT']:
             self.update_score(-10)
         elif actions['TURN_RIGHT']:
