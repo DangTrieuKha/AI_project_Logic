@@ -12,4 +12,4 @@
     + ô nào agent chưa biết thì tô đen
     + Những ô nào agent có thông tin chính xác thì mới hiện nhận thức về ô đó ( sử dụng truy vấn KB như đã hướng dẫn trong About_KB)
     + Vị trí và hướng hiện tại của agent
-- Viết hàm `run()` cho agent
+- Viết hàm `run()` cho agent : `Phát`
