@@ -2,7 +2,9 @@ class Action:
     def __init__(self) -> None:
         self.position = (1, 1)
         self.direction = 'UP'
-        self.actions = {'SHOOT': False, 'GRAB': False, 'CLIMB': False, 'MOVE_FORWARD': False, 'TURN_LEFT': False, 'TURN_RIGHT': False}
+        self.actions = {'SHOOT': False, 'GRAB': False, 'CLIMB': False, 'MOVE_FORWARD': False, 'TURN_LEFT': False, 'TURN_RIGHT': False, 'HEAL':False}
+        self.agent_Health = 100
+        self.agent_number_of_HL = 0 # the number of healing poison that belongs to agent
 
     def act(self, action):
         self.actions[action] = True
@@ -17,7 +19,16 @@ class Action:
                 return True
             else:
                 self.actions['CLIMB'] = False
+        elif action == 'HEAL':
+            if self.agent_number_of_HL > 0:
+                self.healing()
+            else:
+                self.actions['HEAL'] = False
 
+    def healing(self):
+        self.agent_Health = 100
+        self.agent_number_of_HL -=1
+        
     def turn_left(self):
         directions = ['UP', 'LEFT', 'DOWN', 'RIGHT']
         self.direction = directions[(directions.index(self.direction) + 1) % 4]

@@ -4,6 +4,8 @@ class Program:
         self.update_percepts()
         self.agent_action = agent_action
         self.agent_score = 0
+        self.agent_Health = 100
+        self.agent_number_of_HL = 0 # the number of healing poison that belongs to agent
 
     def load_map(self, map_file):
         with open(map_file, 'r') as file:
@@ -103,6 +105,7 @@ class Program:
                 for i,j in adjacent:
                     if 'S' in self.map[i][j]:
                         self.map[i][j].remove('S')
+        
         
 
 
