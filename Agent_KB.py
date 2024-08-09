@@ -139,7 +139,6 @@ class AgentKB:
                 
                 
         if 'W_H' in percepts:
-            
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
@@ -147,7 +146,6 @@ class AgentKB:
                     tmp.append(self.pos_literal_poison(x_new, y_new))
             self.add_clause(tmp)
         else:
-            
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
@@ -292,12 +290,6 @@ class AgentKB:
         query = [self.neg_literal_healing(x, y)]
         result = self.ask(query)
         return result
-
-
-        
-
-    
-
 
 # # Khởi tạo Agent KB
 # agent_kb = AgentKB()
