@@ -45,9 +45,9 @@ class AgentKB:
             return True
         return False
     
-    #This function use to add a negative clause to KB. 
-    #Because when add negative clause to KB can lead to conflict. parameter clause has form as: self.neg_literrial_...(x,y)
-    def do_negative_clause(self, clause):
+    #This function use to add a single clause to KB. 
+    #when add a single clause to KB can lead to conflict so create this function. parameter clause has form as: self.neg_literrial_...(x,y)
+    def add_single_clause(self, clause):
         new_kb = CNF()
         pos_clause = -clause
 
@@ -62,7 +62,28 @@ class AgentKB:
         new_kb.append([clause])
         self.kb = new_kb
 
-
+    # this function is used to confirm cell (x,y) do not have wumpus after shoot
+    def assertNoWumpusPostShoot(self, x,y):
+        # add not wumpus at (x,y)
+        self.add_single_clause(self.neg_literal_wumpus(x,y))
+        #add not reliable stench at adjacent celss
+        dx = [-1, 1, 0, 0]
+        dy = [0,0,-1,1]
+        for k in range(4):
+            x_new = x + dx[k]
+            y_new = y + dy[k]
+            if self.isValid(x_new,y_new):
+                self.add_single_clause(self.neg_literal_reliable_stench(x_new,y_new))
+    # this function is used to confirm cell (x,y) do not have healing after grab
+    def assertNoHealingPostGrab(self,x,y):
+        self.add_single_clause(self.neg_literal_healing(x,y))
+        dx = [-1, 1, 0, 0]
+        dy = [0,0,-1,1]
+        for k in range(4):
+            x_new = x + dx[k]
+            y_new = y + dy[k]
+            if self.isValid(x_new,y_new):
+                self.add_single_clause(self.neg_literal_reliable_glow(x_new,y_new))
 
     def tell(self, percepts, x,y):
         dx = [-1, 1, 0, 0]
@@ -81,7 +102,7 @@ class AgentKB:
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
-                    self.do_negative_clause(self.neg_literal_pit(x_new,y_new))
+                    self.add_single_clause(self.neg_literal_pit(x_new,y_new))
 
                 
                 
@@ -92,15 +113,28 @@ class AgentKB:
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
-                    tmp.append(self.pos_literal_wumpus(x_new, y_new))
+                    #add (S and R_S) -> W
+                    tmp.append(self.neg_literal_stench(x,y), self.neg_literal_reliable_stench(x,y),self.pos_literal_wumpus(x_new, y_new))
+                    
             self.add_clause(tmp)
+            #add S
+            self.add_single_clause(self.pos_literal_stench(x,y))
+            # add R_S
+            self.add_single_clause(self.pos_literal_reliable_stench(x,y))
+
         else:
-            
+            # add not S
+            self.add_single_clause(self.neg_literal_stench(x,y))
+            # add R_S
+            self.add_single_clause(self.pos_literal_reliable_stench(x,y))
+            #add not wumpus
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
-                    self.do_negative_clause(self.neg_literal_wumpus(x_new,y_new))
+                    # add not W
+                    self.add_single_clause(self.neg_literal_wumpus(x_new,y_new))
+            
                 
                 
         if 'W_H' in percepts:
@@ -117,7 +151,7 @@ class AgentKB:
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
-                    self.do_negative_clause(self.neg_literal_poison(x_new,y_new))
+                    self.add_single_clause(self.neg_literal_poison(x_new,y_new))
                 
                 
         if 'G_L' in percepts:
@@ -126,26 +160,38 @@ class AgentKB:
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
-                    tmp.append(self.pos_literal_healing(x_new, y_new))
+                    # add (G and R_G) -> H, add G, add R_G
+                    tmp.append(self.neg_literal_glow(x,y), self.neg_literal_reliable_glow(x,y),self.pos_literal_healing(x_new, y_new))
+                    
             self.add_clause(tmp)
+            #add G
+            self.add_single_clause(self.pos_literal_glow(x,y))
+            # add R_G
+            self.add_single_clause(self.pos_literal_reliable_glow(x,y))
         else:
+            #add not G
+            self.add_single_clause(self.neg_literal_glow(x,y))
+            # add R_G
+            self.add_single_clause(self.pos_literal_reliable_glow(x,y))
+            # add not H
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
-                    self.do_negative_clause(self.neg_literal_healing(x_new, y_new))
+                    self.add_single_clause(self.neg_literal_healing(x_new, y_new))
+                    
 
                 
                 
         if 'P' in percepts:
             self.add_clause([self.pos_literal_pit(x,y)])
         else:
-            self.do_negative_clause(self.neg_literal_pit(x,y))
+            self.add_single_clause(self.neg_literal_pit(x,y))
 
         if 'W' in percepts:
             self.add_clause([self.pos_literal_wumpus(x,y)])
         else:
-            self.do_negative_clause(self.neg_literal_wumpus(x,y))
+            self.add_single_clause(self.neg_literal_wumpus(x,y))
                 
                 
                 
@@ -154,13 +200,13 @@ class AgentKB:
         if  'P_G' in percepts:
             self.add_clause([self.pos_literal_poison(x,y)])
         else:
-            self.do_negative_clause(self.neg_literal_poison(x,y))
+            self.add_single_clause(self.neg_literal_poison(x,y))
     
                 
         if 'H_P' in percepts:
             self.add_clause([self.pos_literal_healing(x,y)])
         else:
-            self.do_negative_clause(self.neg_literal_healing(x,y))
+            self.add_single_clause(self.neg_literal_healing(x,y))
 
                 
 
@@ -179,6 +225,14 @@ class AgentKB:
     def pos_literal_healing(self, x, y):
         # Chuyển (x, y) thành literal tích cực cho poison
         return (x * 10 + y) + 300  
+    def pos_literal_stench(self,x,y):
+        return (x*10 + y) + 400
+    def pos_literal_glow(self,x,y):
+        return (x*10 + y) + 500
+    def pos_literal_reliable_stench(self,x,y):
+        return (x*10 + y) + 600
+    def pos_literal_reliable_glow(self,x,y):
+        return (x*10 + y) + 700
     
     # Phủ định
     def neg_literal_pit(self, x, y):
@@ -188,11 +242,19 @@ class AgentKB:
         # Chuyển (x, y) thành literal âm cho Wumpus
         return -self.pos_literal_wumpus(x, y)
     def neg_literal_poison(self, x, y):
-        # Chuyển (x, y) thành literal âm cho Wumpus
+        
         return -self.pos_literal_poison(x, y)
     def neg_literal_healing(self, x, y):
-        # Chuyển (x, y) thành literal âm cho Wumpus
+        
         return -self.pos_literal_healing(x, y)
+    def neg_literal_stench(self,x,y):
+        return -self.pos_literal_stench(x,y)
+    def neg_literal_glow(self,x,y):
+        return -self.pos_literal_glow(x,y)
+    def neg_literal_reliable_stench(self,x,y):
+        return - self.pos_literal_reliable_stench(x,y)
+    def neg_literal_reliable_glow(self,x,y):
+        return -self.pos_literal_reliable_glow(x,y)
 
     # Truy vấn
     def is_there_pit(self, x, y):
