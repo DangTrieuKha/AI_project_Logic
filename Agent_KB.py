@@ -109,7 +109,8 @@ class AgentKB:
         if 'S' in percepts:
              # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
             tmp = []
-            tmp.append(self.neg_literal_stench(x,y), self.neg_literal_reliable_stench(x,y))
+            tmp.append(self.neg_literal_stench(x,y))
+            tmp.append(self.neg_literal_reliable_stench(x,y))
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
@@ -157,7 +158,8 @@ class AgentKB:
                 
         if 'G_L' in percepts:
             tmp = []
-            tmp.append(self.neg_literal_glow(x,y), self.neg_literal_reliable_glow(x,y))
+            tmp.append(self.neg_literal_glow(x,y))
+            tmp.append( self.neg_literal_reliable_glow(x,y))
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
