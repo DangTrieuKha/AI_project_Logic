@@ -15,8 +15,8 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Wumpus World")
-        self.root.geometry("600x600")
-        self.cell_size = 40
+        self.root.geometry("700x700")
+        self.cell_size = 50
     
         self.agentKB = Agent_KB.AgentKB()
         #self.agentKB = agent_kb
@@ -29,7 +29,7 @@ class App:
         self.map_agent_frame = tk.Frame(self.root)
 
         # Load images
-        self.player_image = tk.PhotoImage(file=os.path.join("Image", "agent1.png"))
+        self.player_image = tk.PhotoImage(file=os.path.join("Image", "agent.png"))
         self.player_image_left = tk.PhotoImage(file=os.path.join("Image", "agent_left.png"))
         self.player_image_right = tk.PhotoImage(file=os.path.join("Image", "agent_right.png"))
         self.gold_image = tk.PhotoImage(file=os.path.join("Image", "gold.png"))
@@ -92,7 +92,7 @@ class App:
                 self.draw_element_i(i, j, cell)
     
     def draw_element_agent(self, i, j, cell):
-        x, y = i * self.cell_size, j * self.cell_size
+        x, y = j * self.cell_size, i * self.cell_size
 
         if 'G' in cell and 'L' not in cell and 'P' not in cell:
             self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
@@ -301,8 +301,9 @@ class App:
         self.agent.run() 
         x, y = self.agent.state.get_position()
         self.update_grid(x, y, "green")
-        x_m, y_m = x - 1, 10 - y
-        self.draw_element_agent(x_m, y_m, self.program.map[10 - x][y - 1])
+        x_m, y_m = 10 - y, x - 1
+        print(self.program.map[x_m][y_m])
+        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m])
         self.draw_agent(self.agent.state)
         self.draw_agentKB(self.agent.state)
         self.score_label.config(text=f"Score: {self.program.get_score()}")
