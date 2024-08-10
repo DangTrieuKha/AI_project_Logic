@@ -1,3 +1,5 @@
 Libraries to install:
 pysat
 python-sat
+tkinter
+tk
