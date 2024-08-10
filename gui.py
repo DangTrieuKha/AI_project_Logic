@@ -2,7 +2,11 @@ import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
 import os
+import copy
 import Program
+import State
+import Agent_KB
+import Agent
 
 # Constants
 CELL_SIZE = 64
@@ -12,24 +16,31 @@ class App:
         self.root = root
         self.root.title("Wumpus World")
         self.root.geometry("600x600")
+        self.cell_size = 40
     
+        self.agentKB = Agent_KB.AgentKB()
+        #self.agentKB = agent_kb
         self.default_text = "Enter relative path of file..."
         
         # Frame
         self.welcome_frame = tk.Frame(self.root)
         self.main_frame = tk.Frame(self.root)
         self.map_frame = tk.Frame(self.root)
+        self.map_agent_frame = tk.Frame(self.root)
 
         # Load images
         self.player_image = tk.PhotoImage(file=os.path.join("Image", "agent1.png"))
+        self.player_image_left = tk.PhotoImage(file=os.path.join("Image", "agent_left.png"))
+        self.player_image_right = tk.PhotoImage(file=os.path.join("Image", "agent_right.png"))
         self.gold_image = tk.PhotoImage(file=os.path.join("Image", "gold.png"))
         self.wumpus_image = tk.PhotoImage(file=os.path.join("Image", "wumpus.png"))
         self.pit_image = tk.PhotoImage(file=os.path.join("Image", "pit.png"))
+        self.poison_image = tk.PhotoImage(file=os.path.join("Image", "poison.png"))
+        self.healing_poison_image = tk.PhotoImage(file=os.path.join("Image", "healing_poison.png"))
         
 
         self.show_welcome_frame()
-
-        
+    
     
     def draw_grid(self):
         rows = len(self.program.map)
@@ -40,24 +51,110 @@ class App:
                 x1, y1 = x0 + self.cell_size, y0 + self.cell_size
                 self.canvas.create_rectangle(x0, y0, x1, y1, outline="black")
 
+    def update_grid(self, i, j, color):
+        x0, y0 = (i - 1) * self.cell_size, (10 - j) * self.cell_size
+        x1, y1 = x0 + self.cell_size, y0 + self.cell_size
+        self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="black")
+
+    
+    def draw_element_i(self, i, j, cell):
+
+        x, y = j * self.cell_size, i * self.cell_size
+        if 'A' in cell:
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.player_image, anchor=CENTER)
+        if 'G' in cell and 'L' not in cell and 'P' not in cell:
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
+        
+        if 'W' in cell and 'H' not in cell:
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER)
+        if 'S' in cell:
+            self.canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
+        
+        if 'P' in cell and 'G' not in cell and 'H' not in cell:
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.pit_image, anchor=CENTER)
+        if 'B' in cell:
+            self.canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
+
+        if 'H_P' in cell:
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
+        if 'G_L' in cell:
+            self.canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
+        
+        if 'P_G' in cell:
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
+        if 'W_H' in cell:
+            self.canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
+
     def draw_elements(self):
         self.canvas.delete("element")
         for i, row in enumerate(self.program.map):
             for j, cell in enumerate(row):
-                x, y = j * self.cell_size, i * self.cell_size
-                if 'A' in cell:
-                    self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.player_image, anchor=CENTER)
-                if 'G' in cell:
-                    self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
-                if 'W' in cell:
-                    self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER)
-                if 'P' in cell:
-                    self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.pit_image, anchor=CENTER)
-                if 'B' in cell:
-                    self.canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 14", tags="element")
-                if 'S' in cell:
-                    self.canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="green", font="Arial 14", tags="element")
-                
+                self.draw_element_i(i, j, cell)
+    
+    def draw_element_agent(self, i, j, cell):
+        x, y = i * self.cell_size, j * self.cell_size
+
+        if 'G' in cell and 'L' not in cell and 'P' not in cell:
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
+        
+        if 'S' in cell:
+            self.canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
+        
+        if 'B' in cell:
+            self.canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
+
+        if 'H_P' in cell:
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
+        if 'G_L' in cell:
+            self.canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
+        
+        if 'P_G' in cell:
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
+        if 'W_H' in cell:
+            self.canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
+        
+    
+    def draw_agent(self, state):
+        self.canvas.delete("agent")
+        x, y = state.get_position()
+        x_m, y_m = (x - 1) * self.cell_size, (10 - y) * self.cell_size
+        direction = state.get_direction()
+        if direction == 'UP':
+            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image, anchor=CENTER, tags="agent")
+        elif direction == 'DOWN':
+            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image, anchor=CENTER, tags="agent")
+        elif direction == 'LEFT':
+            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_left, anchor=CENTER, tags="agent")
+        elif direction == 'RIGHT':
+            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_right, anchor=CENTER, tags="agent")
+        #self.canvas.tag_raise("agent")
+
+    def draw_agentKB(self, state):
+        self.canvas.delete("agentKB")
+        x, y = state.get_position()
+        
+        dx = [-1, 1, 0, 0]
+        dy = [0,0,-1,1]
+        for i in range(4):
+            x1 = x + dx[i]
+            y1 = y + dy[i]
+            x_u, y_u = copy.deepcopy(x1), copy.deepcopy(y1)
+            if (x1 >= 1 and x1 <= 10 and y1 >= 1 and y1 <= 10):
+                x1 = (x1 - 1) * self.cell_size
+                y1 = (10 - y1) * self.cell_size
+                check = False
+                if self.agentKB.is_there_pit(x1, y1):
+                    self.canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.pit_image, anchor=CENTER, tags="agentKB")
+                    check = True
+                if self.agentKB.is_there_wumpus(x1, y1):
+                    self.canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER, tags="agentKB")
+                    check = True
+                if self.agentKB.is_there_poison(x1, y1):
+                    self.canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.poison_image, anchor=CENTER, tags="agentKB")
+                    check = True
+                if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and check == False:
+                    self.update_grid(x_u, y_u, "blue")
+            
 
     def on_entry_click(self, event):
         if self.entry.get() == self.default_text:
@@ -69,18 +166,17 @@ class App:
             self.entry.insert(0, self.default_text)
             self.entry.config(fg="gray")
     def enter_input(self):
-        self.filename = self.entry.get()
-        if self.check_file_exists(self.filename):
-            self.default_text = self.filename
-            self.program = Program.Program(self.filename)
-            self.program = Program.Program(self.default_text)    
+        filename = self.entry.get()
+        if self.check_file_exists(filename):
+            self.default_text = filename
+            self.program = Program.Program(self.default_text)   
+            self.agent = Agent.Agent(self.program.get_env_info) 
             self.show_main_frame()
                 
         #self.default_text = self.filename
         else:
             messagebox.showerror("Error", "File not found. Please enter a valid file path.")
         #self.show_main_frame()
-
 
     def hidden_all_frame(self):
         for widget in self.root.winfo_children():
@@ -95,7 +191,7 @@ class App:
         self.clear_frame(self.welcome_frame)
         self.welcome_frame.pack(expand=True, anchor='center')
 
-        self.label = tk.Label(self.welcome_frame, text="Welcome to the search project", font=("Helvetica", 16), fg="black")
+        self.label = tk.Label(self.welcome_frame, text="Welcome to Wumpus World", font=("Helvetica", 16), fg="black")
         self.label.pack(pady=(20, 20))
 
         self.main_frame = tk.Frame(root)
@@ -127,7 +223,6 @@ class App:
         self.search_board = None
 
     def show_main_frame(self):
-        self.current_entity_index = 0
         self.hidden_all_frame()
         self.clear_frame(self.main_frame)
         self.main_frame.pack(expand=True, anchor='center')
@@ -139,11 +234,9 @@ class App:
         self.input_button = tk.Button(self.button_mainframe, text="Show map", command=self.show_map, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.input_button.pack(pady=(5, 5))
 
-        # self.result = tk.Button(self.button_mainframe, text="Show path",command= self.show_path_frame, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
-        # self.result.pack(pady=(5, 5))
+        self.run_button = tk.Button(self.button_mainframe, text="Run", command=self.show_map_agent, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.run_button.pack(pady=(5, 5))
 
-        # self.step = tk.Button(self.button_mainframe, text="Step by step", command=self.show_step_by_step, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
-        # self.step.pack(pady=(5, 5))
 
         
         self.default_text = "Enter relative path of file..."
@@ -157,7 +250,7 @@ class App:
 
         rows = len(self.program.map)
         cols = len(self.program.map[0])
-        self.cell_size = 20 + 150 / (rows if rows > cols else cols)
+        
 
         self.canvas = Canvas(self.map_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
         self.canvas.pack(pady=(10, 10))
@@ -165,10 +258,66 @@ class App:
         self.draw_grid()
         self.draw_elements()
 
-        self.button_frame_input = tk.Frame(self.map_frame)
-        self.button_frame_input.pack(pady=(10, 10))
-        #self.back = tk.Button(self.button_frame_input, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
-        #self.back.pack(pady=(5, 5))
+        self.button_frame = tk.Frame(self.map_frame)
+        self.button_frame.pack(pady=(10, 10))
+
+        self.back = tk.Button(self.button_frame, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.back.pack(pady=(5, 5))
+
+    def show_map_agent(self):
+        self.hidden_all_frame()
+        self.clear_frame(self.map_agent_frame)
+        self.map_agent_frame.pack(expand=True, anchor='center')
+
+        rows = len(self.program.map)
+        cols = len(self.program.map[0])
+
+        self.score_label = tk.Label(self.map_agent_frame, text=f"Score: {self.program.get_score}", font=("Arial", 14), bg="white")
+        self.score_label.pack()
+        self.score_label.config(text=f"Score: {self.program.get_score()}")
+
+        self.canvas = Canvas(self.map_agent_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
+        self.canvas.pack(pady=(10, 10))
+
+        self.draw_grid()
+        
+        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green")
+        self.draw_agent(self.agent.state)
+
+        self.button_frame_step_2 = tk.Frame(self.map_agent_frame)
+        self.button_frame_step_2.pack(pady=(10, 10))
+        self.next_step_button = tk.Button(self.button_frame_step_2, text="Next Step", command=self.next_step, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.next_step_button.pack(side = tk.LEFT ,padx=(0, 3))
+        self.auto_run_button = tk.Button(self.button_frame_step_2, text="Auto Run", command=self.auto_run, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.auto_run_button.pack(side = tk.RIGHT, padx=(8, 10))
+
+        self.button_agent_frame = tk.Frame(self.map_agent_frame)
+        self.button_agent_frame.pack(pady=(20, 20))
+
+        self.back_run = tk.Button(self.button_agent_frame, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.back_run.pack(pady=(5, 5))
+
+    def next_step(self):
+        self.agent.run() 
+        x, y = self.agent.state.get_position()
+        self.update_grid(x, y, "green")
+        x_m, y_m = x - 1, 10 - y
+        self.draw_element_agent(x_m, y_m, self.program.map[10 - x][y - 1])
+        self.draw_agent(self.agent.state)
+        self.draw_agentKB(self.agent.state)
+        self.score_label.config(text=f"Score: {self.program.get_score()}")
+        if self.program.run() == "Finished":
+            self.program.end_game()
+
+    
+    def auto_run(self):
+        while True:
+            self.next_step()
+            self.root.update()
+            self.root.after(500)
+            if self.program.run() == "Finished":
+                break
+
     
     def check_file_exists(self, filename):
         return os.path.isfile(filename)
@@ -177,8 +326,21 @@ class App:
         self.player_position = self.program.start
         self.draw_elements()
 
+# Khởi tạo Agent KB
+agent_kb = Agent_KB.AgentKB()
+
+# Thêm nhận thức: có Breeze tại ô (1,1)
+agent_kb.tell('',1,1)
+# Thêm nhận thức: tại ô (1,2) có pit
+agent_kb.tell('B',1,2)
+agent_kb.tell('',2,2)
+agent_kb.tell('B',2,3)
+# Kiểm tra liệu có Pit tại (1,2)
+result_pit = agent_kb.is_there_pit(1, 2)
+print(result_pit)
     
 if __name__ == "__main__":
     root = tk.Tk()
     game = App(root)
     root.mainloop()
+

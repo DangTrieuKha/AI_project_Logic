@@ -15,7 +15,7 @@ class Agent:
         pass
 
     def run(self):
-        if self.state.health == 25:
+        if self.state.agent_health == 25:
             self.state.act('HEAL')
             return
 
