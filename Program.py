@@ -10,6 +10,7 @@ class Program:
     def load_map(self, map_file):
         with open(map_file, 'r') as file:
             lines = file.readlines()
+            n = int(lines[0])
             grid = []
             for line in lines[1:]:
                 grid.append(line.strip().split('.'))
@@ -45,9 +46,9 @@ class Program:
     def add_whiff(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
             if self.map[i][j] == '-':
-                self.map[i][j] = 'W'
+                self.map[i][j] = 'W_H'
             elif 'W' not in self.map[i][j]:
-                self.map[i][j] += 'W'
+                self.map[i][j] += 'W_H'
 
     def add_glow(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
@@ -70,7 +71,10 @@ class Program:
 
     def get_env_info(self):
         # Return the percepts of the current cell
-        return self.map[self.agent_state.get_position()[0]][self.agent_state.get_position()[1]]
+        x, y = self.agent_state.get_position()
+        x_map = 10 - x
+        y_map = y - 1
+        return self.map[x_map][y_map]
     
     def update_map(self):
         x,y = self.agent_state.position
@@ -108,6 +112,9 @@ class Program:
     
     def update_score(self, value):
         self.agent_score += value
+    
+    def get_score(self):
+        return self.agent_score
 
     def end_game(self):
         print(f"Game End! Score: {self.agent_score}")
@@ -139,5 +146,5 @@ class Program:
         elif actions['TURN_RIGHT']:
             self.update_score(-10)
             self.agent_state.actions['TURN_RIGHT'] = False
-
         return False
+    
