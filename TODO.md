@@ -20,7 +20,7 @@
 * Phát:
     - Kiểm tra lại logic các hàm trong Program và Agent []
     - Tạo 1 test case và mô tả test case này trong báo cáo []
-    - Viết báo cáo cho ý tưởng chọn nước của agent []
+    - Viết báo cáo cho ý tưởng chọn nước đi của agent []
 * Hoàng:  
      - Tạo 1 test case và mô tả test case này trong báo cáo []
      - Đọc hiểu code trong Agent_KB.py và phát hiện lỗi nếu có []
