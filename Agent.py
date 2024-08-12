@@ -33,7 +33,7 @@ class Agent:
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
 
         if 'S' not in tmp and 'B' not in tmp:
-            self.state.act('MOVE_FORWARD')
+            self.state.act(self.state.get_next_action())
             return
         
         (next_x, next_y), neighbors = self.state.get_forward_and_neighbors()
