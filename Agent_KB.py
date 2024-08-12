@@ -216,7 +216,7 @@ class AgentKB:
     # Khẳng định
     def pos_literal_pit(self, x, y):
         # Chuyển (x, y) thành literal tích cực cho Pit
-        return (x * 10 + y) + 1  # Thêm 1 để đảm bảo các literals không trùng lặp
+        return (x * 10 + y) 
 
     def pos_literal_wumpus(self, x, y):
         # Chuyển (x, y) thành literal tích cực cho Wumpus
