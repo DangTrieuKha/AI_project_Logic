@@ -129,19 +129,15 @@ class App:
         self.canvas.delete("agent")
         x, y = state.get_position()
         x_m, y_m = (x - 1) * self.cell_size, (10 - y) * self.cell_size
-        actions = state.get_actions()
-        action = None
-        for i in actions:
-            if actions[i] == True:
-                action = i
-                break
-        if action == 'MOVE_FORWARD':
+        direction = state.get_direction()
+
+        if direction == 'UP':
             self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_up, anchor=CENTER, tags="agent")
-        #elif direction == 'DOWN':
-        #    self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_down, anchor=CENTER, tags="agent")
-        elif action == 'TURN_LEFT':
+        elif direction == 'DOWN':
+            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_down, anchor=CENTER, tags="agent")
+        elif direction == 'LEFT':
             self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_left, anchor=CENTER, tags="agent")
-        elif action == 'TURN_RIGHT':
+        elif direction == 'RIGHT':
             self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_right, anchor=CENTER, tags="agent")
         #self.canvas.tag_raise("agent")
 
@@ -293,13 +289,21 @@ class App:
         self.score_label.pack()
         self.score_label.config(text=f"Score: {self.program.get_score()}")
 
+        self.health_label = tk.Label(self.map_agent_frame, text=f"Health: {self.program.agent_state.get_health}", font=("Arial", 14), bg="white")
+        self.health_label.pack()
+        self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
+
         self.canvas = Canvas(self.map_agent_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
         self.canvas.pack(pady=(10, 10))
 
         self.draw_grid()
-        
         self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green")
         self.draw_agent(self.agent.state)
+
+        action = self.action()
+        self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white")
+        self.action_label.pack()
+        self.score_label.config(text=f"Heal: {action}")
 
         self.button_frame_step_2 = tk.Frame(self.map_agent_frame)
         self.button_frame_step_2.pack(pady=(10, 10))
@@ -315,17 +319,18 @@ class App:
         self.back_run.pack(pady=(5, 5))
 
     def next_step(self):
+        
         self.agent.run() 
         x, y = self.agent.state.get_position()
         self.update_grid(x, y, "green")
         x_m, y_m = 10 - y, x - 1
         print(self.program.map[x_m][y_m])
-        thread = threading.Thread(target=self.play_sound)
-        thread.start()
         self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m])
         self.draw_agent(self.agent.state)
         self.draw_agentKB(self.agent.state)
         self.score_label.config(text=f"Score: {self.program.get_score()}")
+        self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
+        self.action_label.config(text=f"Action: {self.action()}")
         if self.program.run() == "Finished":
             self.program.end_game()
 
@@ -337,7 +342,13 @@ class App:
             self.root.after(500)
             if self.program.run() == "Finished":
                 break
-    
+
+    def action(self):
+        actions = self.program.agent_state.get_actions()
+        for act in actions:
+            if actions[act]:
+                return act
+
     def play_sound(self):
         # Phát âm thanh bằng pygame
         self.sound.play()
