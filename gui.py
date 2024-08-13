@@ -3,10 +3,12 @@ from tkinter import *
 from tkinter import messagebox
 import os
 import copy
-import Program
-import State
-import Agent_KB
-import Agent
+import pygame
+import threading
+from Program import Program
+from State import State
+from Agent_KB import AgentKB
+from Agent import Agent
 
 # Constants
 CELL_SIZE = 64
@@ -18,8 +20,15 @@ class App:
         self.root.geometry("700x700")
         self.cell_size = 50
     
-        self.agentKB = Agent_KB.AgentKB()
-        #self.agentKB = agent_kb
+        try:
+            pygame.mixer.init()
+            self.sound = pygame.mixer.Sound("Image/scream.mp3")
+        except pygame.error as e:
+            print(f"Không thể tải âm thanh: {e}")
+            return
+
+        #self.agentKB = Agent_KB.AgentKB()
+        self.agentKB = agent_kb
         self.default_text = "Enter relative path of file..."
         
         # Frame
@@ -29,7 +38,8 @@ class App:
         self.map_agent_frame = tk.Frame(self.root)
 
         # Load images
-        self.player_image = tk.PhotoImage(file=os.path.join("Image", "agent.png"))
+        self.player_image_up = tk.PhotoImage(file=os.path.join("Image", "agent_up.png"))
+        self.player_image_down = tk.PhotoImage(file=os.path.join("Image", "agent_down.png"))
         self.player_image_left = tk.PhotoImage(file=os.path.join("Image", "agent_left.png"))
         self.player_image_right = tk.PhotoImage(file=os.path.join("Image", "agent_right.png"))
         self.gold_image = tk.PhotoImage(file=os.path.join("Image", "gold.png"))
@@ -38,6 +48,7 @@ class App:
         self.poison_image = tk.PhotoImage(file=os.path.join("Image", "poison.png"))
         self.healing_poison_image = tk.PhotoImage(file=os.path.join("Image", "healing_poison.png"))
         
+        self.agentKB_list = []
 
         self.show_welcome_frame()
     
@@ -61,7 +72,7 @@ class App:
 
         x, y = j * self.cell_size, i * self.cell_size
         if 'A' in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.player_image, anchor=CENTER)
+            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.player_image_down, anchor=CENTER)
         if 'G' in cell and 'L' not in cell and 'P' not in cell:
             self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
         
@@ -118,14 +129,19 @@ class App:
         self.canvas.delete("agent")
         x, y = state.get_position()
         x_m, y_m = (x - 1) * self.cell_size, (10 - y) * self.cell_size
-        direction = state.get_direction()
-        if direction == 'UP':
-            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image, anchor=CENTER, tags="agent")
-        elif direction == 'DOWN':
-            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image, anchor=CENTER, tags="agent")
-        elif direction == 'LEFT':
+        actions = state.get_actions()
+        action = None
+        for i in actions:
+            if actions[i] == True:
+                action = i
+                break
+        if action == 'MOVE_FORWARD':
+            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_up, anchor=CENTER, tags="agent")
+        #elif direction == 'DOWN':
+        #    self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_down, anchor=CENTER, tags="agent")
+        elif action == 'TURN_LEFT':
             self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_left, anchor=CENTER, tags="agent")
-        elif direction == 'RIGHT':
+        elif action == 'TURN_RIGHT':
             self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_right, anchor=CENTER, tags="agent")
         #self.canvas.tag_raise("agent")
 
@@ -138,6 +154,8 @@ class App:
         for i in range(4):
             x1 = x + dx[i]
             y1 = y + dy[i]
+            self.agentKB_list.append((x1, y1))
+        for x1, y1 in self.agentKB_list:
             x_u, y_u = copy.deepcopy(x1), copy.deepcopy(y1)
             if (x1 >= 1 and x1 <= 10 and y1 >= 1 and y1 <= 10):
                 x1 = (x1 - 1) * self.cell_size
@@ -154,6 +172,8 @@ class App:
                     check = True
                 if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and check == False:
                     self.update_grid(x_u, y_u, "blue")
+                else:
+                    self.update_grid(x_u, y_u, "red")
             
 
     def on_entry_click(self, event):
@@ -169,14 +189,11 @@ class App:
         filename = self.entry.get()
         if self.check_file_exists(filename):
             self.default_text = filename
-            self.program = Program.Program(self.default_text)   
-            self.agent = Agent.Agent(self.program.get_env_info) 
+            self.program = Program(self.default_text)   
+            self.agent = Agent(self.program.get_env_info) 
             self.show_main_frame()
-                
-        #self.default_text = self.filename
         else:
             messagebox.showerror("Error", "File not found. Please enter a valid file path.")
-        #self.show_main_frame()
 
     def hidden_all_frame(self):
         for widget in self.root.winfo_children():
@@ -303,6 +320,8 @@ class App:
         self.update_grid(x, y, "green")
         x_m, y_m = 10 - y, x - 1
         print(self.program.map[x_m][y_m])
+        thread = threading.Thread(target=self.play_sound)
+        thread.start()
         self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m])
         self.draw_agent(self.agent.state)
         self.draw_agentKB(self.agent.state)
@@ -318,7 +337,15 @@ class App:
             self.root.after(500)
             if self.program.run() == "Finished":
                 break
+    
+    def play_sound(self):
+        # Phát âm thanh bằng pygame
+        self.sound.play()
 
+    def sound_scream(self):
+        if self.program.is_cream():
+            thread = threading.Thread(target=self.play_sound)
+            thread.start()
     
     def check_file_exists(self, filename):
         return os.path.isfile(filename)
@@ -328,12 +355,12 @@ class App:
         self.draw_elements()
 
 # Khởi tạo Agent KB
-agent_kb = Agent_KB.AgentKB()
+agent_kb = AgentKB()
 
 # Thêm nhận thức: có Breeze tại ô (1,1)
 agent_kb.tell('',1,1)
 # Thêm nhận thức: tại ô (1,2) có pit
-agent_kb.tell('B',1,2)
+agent_kb.tell('B',4,1)
 agent_kb.tell('',2,2)
 agent_kb.tell('B',2,3)
 # Kiểm tra liệu có Pit tại (1,2)
