@@ -6,7 +6,7 @@ class Program:
         self.update_percepts()
         self.agent_state = State()
         self.agent_score = 0
-
+        self.scream = False # is there scream at current cell of agent
     def load_map(self, map_file):
         with open(map_file, 'r') as file:
             lines = file.readlines()
@@ -104,11 +104,15 @@ class Program:
             
             if x_wumpus >= 0 and x_wumpus <= 9 and y_wumpus >=0 and y_wumpus <= 9:
                 if 'W' in self.map[x_wumpus][y_wumpus]:
+                    self.scream = True
                     self.map[x_wumpus][y_wumpus].remove('W')
                 adjacent = self.get_adjacent_cells(x_wumpus, y_wumpus)
                 for i,j in adjacent:
                     if 'S' in self.map[i][j]:
                         self.map[i][j].remove('S')
+    
+    def is_cream(self):
+        return self.scream
     
     def update_score(self, value):
         self.agent_score += value
@@ -121,6 +125,7 @@ class Program:
         return "Finished"
 
     def run(self):
+        self.scream = False
         actions = self.agent_state.get_actions()
         if actions['CLIMB']:
             self.update_score(10)
