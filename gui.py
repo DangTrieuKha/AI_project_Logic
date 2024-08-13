@@ -53,96 +53,96 @@ class App:
         self.show_welcome_frame()
     
     
-    def draw_grid(self):
+    def draw_grid(self, canvas):
         rows = len(self.program.map)
         cols = len(self.program.map[0])
         for i in range(rows):
             for j in range(cols):
                 x0, y0 = j * self.cell_size, i * self.cell_size
                 x1, y1 = x0 + self.cell_size, y0 + self.cell_size
-                self.canvas.create_rectangle(x0, y0, x1, y1, outline="black")
+                canvas.create_rectangle(x0, y0, x1, y1, outline="black")
 
-    def update_grid(self, i, j, color):
+    def update_grid(self, i, j, color, canvas):
         x0, y0 = (i - 1) * self.cell_size, (10 - j) * self.cell_size
         x1, y1 = x0 + self.cell_size, y0 + self.cell_size
-        self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="black")
+        canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="black")
 
     
-    def draw_element_i(self, i, j, cell):
+    def draw_element_i(self, i, j, cell, canvas):
 
         x, y = j * self.cell_size, i * self.cell_size
         if 'A' in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.player_image_down, anchor=CENTER)
+            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.player_image_down, anchor=CENTER)
         if 'G' in cell and 'L' not in cell and 'P' not in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
+            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
         
         if 'W' in cell and 'H' not in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER)
+            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER)
         if 'S' in cell:
-            self.canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
+            canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
         
         if 'P' in cell and 'G' not in cell and 'H' not in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.pit_image, anchor=CENTER)
+            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.pit_image, anchor=CENTER)
         if 'B' in cell:
-            self.canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
+            canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
 
         if 'H_P' in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
+            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
         if 'G_L' in cell:
-            self.canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
+            canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
         
         if 'P_G' in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
+            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
         if 'W_H' in cell:
-            self.canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
+            canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
 
-    def draw_elements(self):
-        self.canvas.delete("element")
+    def draw_elements(self, canvas):
+        canvas.delete("element")
         for i, row in enumerate(self.program.map):
             for j, cell in enumerate(row):
-                self.draw_element_i(i, j, cell)
+                self.draw_element_i(i, j, cell, canvas=canvas)
     
-    def draw_element_agent(self, i, j, cell):
+    def draw_element_agent(self, i, j, cell, canvas):
         x, y = j * self.cell_size, i * self.cell_size
 
         if 'G' in cell and 'L' not in cell and 'P' not in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
+            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
         
         if 'S' in cell:
-            self.canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
+            canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
         
         if 'B' in cell:
-            self.canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
+            canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
 
         if 'H_P' in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
+            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
         if 'G_L' in cell:
-            self.canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
+            canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
         
         if 'P_G' in cell:
-            self.canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
+            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
         if 'W_H' in cell:
-            self.canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
+            canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
         
     
-    def draw_agent(self, state):
-        self.canvas.delete("agent")
+    def draw_agent(self, state, canvas):
+        canvas.delete("agent")
         x, y = state.get_position()
         x_m, y_m = (x - 1) * self.cell_size, (10 - y) * self.cell_size
         direction = state.get_direction()
 
         if direction == 'UP':
-            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_up, anchor=CENTER, tags="agent")
+            canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_up, anchor=CENTER, tags="agent")
         elif direction == 'DOWN':
-            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_down, anchor=CENTER, tags="agent")
+            canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_down, anchor=CENTER, tags="agent")
         elif direction == 'LEFT':
-            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_left, anchor=CENTER, tags="agent")
+            canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_left, anchor=CENTER, tags="agent")
         elif direction == 'RIGHT':
-            self.canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_right, anchor=CENTER, tags="agent")
-        #self.canvas.tag_raise("agent")
+            canvas.create_image(x_m + self.cell_size // 2, y_m + self.cell_size // 2, image=self.player_image_right, anchor=CENTER, tags="agent")
+        #canvas.tag_raise("agent")
 
-    def draw_agentKB(self, state):
-        self.canvas.delete("agentKB")
+    def draw_agentKB(self, state, canvas):
+        canvas.delete("agentKB")
         x, y = state.get_position()
         
         dx = [-1, 1, 0, 0]
@@ -158,18 +158,18 @@ class App:
                 y1 = (10 - y1) * self.cell_size
                 check = False
                 if self.agentKB.is_there_pit(x1, y1):
-                    self.canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.pit_image, anchor=CENTER, tags="agentKB")
+                    canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.pit_image, anchor=CENTER, tags="agentKB")
                     check = True
                 if self.agentKB.is_there_wumpus(x1, y1):
-                    self.canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER, tags="agentKB")
+                    canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER, tags="agentKB")
                     check = True
                 if self.agentKB.is_there_poison(x1, y1):
-                    self.canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.poison_image, anchor=CENTER, tags="agentKB")
+                    canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.poison_image, anchor=CENTER, tags="agentKB")
                     check = True
                 if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and check == False:
-                    self.update_grid(x_u, y_u, "blue")
+                    self.update_grid(x_u, y_u, "blue", self.canvas)
                 else:
-                    self.update_grid(x_u, y_u, "red")
+                    self.update_grid(x_u, y_u, "red", self.canvas)
             
 
     def on_entry_click(self, event):
@@ -250,8 +250,6 @@ class App:
         self.run_button = tk.Button(self.button_mainframe, text="Run", command=self.show_map_agent, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.run_button.pack(pady=(5, 5))
 
-
-        
         self.default_text = "Enter relative path of file..."
         self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
         self.exit_main.pack(pady=(5, 5))
@@ -264,12 +262,11 @@ class App:
         rows = len(self.program.map)
         cols = len(self.program.map[0])
         
-
         self.canvas = Canvas(self.map_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
         self.canvas.pack(pady=(10, 10))
 
-        self.draw_grid()
-        self.draw_elements()
+        self.draw_grid(canvas=self.canvas)
+        self.draw_elements(canvas=self.canvas)
 
         self.button_frame = tk.Frame(self.map_frame)
         self.button_frame.pack(pady=(10, 10))
@@ -295,10 +292,24 @@ class App:
 
         self.canvas = Canvas(self.map_agent_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
         self.canvas.pack(pady=(10, 10))
+        self.draw_grid(self.canvas)
+        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.canvas)
+        self.draw_agent(self.agent.state, self.canvas)
 
-        self.draw_grid()
-        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green")
-        self.draw_agent(self.agent.state)
+        # self.run_frame = tk.Frame(self.map_agent_frame)
+        # self.run_frame.pack(pady=(10, 10))
+
+        # self.program_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
+        # self.program_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
+        # self.draw_grid(self.program_canvas)
+        # self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.program_canvas)
+        # self.draw_agent(self.agent.state, self.program_canvas)
+
+        # self.agentKB_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
+        # self.agentKB_canvas.pack(side='left', padx=(5, 10), pady=(10, 10))
+        # self.draw_grid(self.agentKB_canvas)
+        # self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.agentKB_canvas)
+        # self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         action = self.action()
         self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white")
@@ -319,15 +330,14 @@ class App:
         self.back_run.pack(pady=(5, 5))
 
     def next_step(self):
-        
         self.agent.run() 
         x, y = self.agent.state.get_position()
-        self.update_grid(x, y, "green")
+        self.update_grid(x, y, "green", self.canvas)
         x_m, y_m = 10 - y, x - 1
         print(self.program.map[x_m][y_m])
-        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m])
-        self.draw_agent(self.agent.state)
-        self.draw_agentKB(self.agent.state)
+        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.canvas)
+        self.draw_agent(self.agent.state, self.canvas)
+        self.draw_agentKB(self.agent.state, self.canvas)
         self.score_label.config(text=f"Score: {self.program.get_score()}")
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
         self.action_label.config(text=f"Action: {self.action()}")
