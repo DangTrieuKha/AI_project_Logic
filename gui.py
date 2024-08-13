@@ -167,9 +167,9 @@ class App:
                     canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.poison_image, anchor=CENTER, tags="agentKB")
                     check = True
                 if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and check == False:
-                    self.update_grid(x_u, y_u, "blue", self.canvas)
+                    self.update_grid(x_u, y_u, "blue", canvas=canvas)
                 else:
-                    self.update_grid(x_u, y_u, "red", self.canvas)
+                    self.update_grid(x_u, y_u, "red", canvas=canvas)
             
 
     def on_entry_click(self, event):
@@ -213,15 +213,12 @@ class App:
         self.entry_frame = tk.Frame(self.main_frame, bg="white")
         self.entry_frame.pack(pady=(40, 40), fill='x')
 
-
         # Tạo entry và đặt nó trong frame con
         self.entry = tk.Entry(self.entry_frame, fg="gray", width=50, justify="left", bg="white", highlightbackground="#2F4F4F")
         self.entry.insert(0, self.default_text)
         self.entry.bind("<FocusIn>", self.on_entry_click)
         self.entry.bind("<FocusOut>", self.on_entry_focus_out)
         self.entry.pack(side='left', padx=(0, 5), fill='x', expand=True)
-
-
 
         # Tạo button Enter và đặt nó trong frame con
         self.button_enter_input = tk.Button(self.entry_frame, text="Enter", command=self.enter_input, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
@@ -290,26 +287,21 @@ class App:
         self.health_label.pack()
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
 
-        self.canvas = Canvas(self.map_agent_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
-        self.canvas.pack(pady=(10, 10))
-        self.draw_grid(self.canvas)
-        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.canvas)
-        self.draw_agent(self.agent.state, self.canvas)
+        self.run_frame = tk.Frame(self.map_agent_frame)
+        self.run_frame.pack(pady=(10, 10))
+        
+        self.program_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
+        self.program_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
+        self.draw_grid(self.program_canvas)
+        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.program_canvas)
+        self.draw_agent(self.agent.state, self.program_canvas)
 
-        # self.run_frame = tk.Frame(self.map_agent_frame)
-        # self.run_frame.pack(pady=(10, 10))
+        self.agentKB_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
+        self.agentKB_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
+        self.draw_grid(self.agentKB_canvas)
+        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.agentKB_canvas)
+        self.draw_agent(self.agent.state, self.agentKB_canvas)
 
-        # self.program_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
-        # self.program_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
-        # self.draw_grid(self.program_canvas)
-        # self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.program_canvas)
-        # self.draw_agent(self.agent.state, self.program_canvas)
-
-        # self.agentKB_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
-        # self.agentKB_canvas.pack(side='left', padx=(5, 10), pady=(10, 10))
-        # self.draw_grid(self.agentKB_canvas)
-        # self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.agentKB_canvas)
-        # self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         action = self.action()
         self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white")
@@ -332,12 +324,14 @@ class App:
     def next_step(self):
         self.agent.run() 
         x, y = self.agent.state.get_position()
-        self.update_grid(x, y, "green", self.canvas)
+        self.update_grid(x, y, "green", self.agentKB_canvas)
         x_m, y_m = 10 - y, x - 1
         print(self.program.map[x_m][y_m])
-        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.canvas)
-        self.draw_agent(self.agent.state, self.canvas)
-        self.draw_agentKB(self.agent.state, self.canvas)
+        
+        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.agentKB_canvas)
+        self.draw_agent(self.agent.state, self.agentKB_canvas)
+        self.draw_agentKB(self.agent.state, self.agentKB_canvas)
+
         self.score_label.config(text=f"Score: {self.program.get_score()}")
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
         self.action_label.config(text=f"Action: {self.action()}")
