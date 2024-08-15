@@ -84,10 +84,10 @@ class Program:
         if self.agent_state.actions['GRAB']:
             adjacent = self.get_adjacent_cells(x_map,y_map)
             if 'H_P' in self.map[x_map][y_map]:
-                self.map[x_map][y_map].remove('H_P')
+                self.map[x_map][y_map].replace('H_P', '', 1)
             for i,j in adjacent:
                 if 'G_L' in self.map[x_map][y_map]:
-                    self.map[x_map][y_map].remove('G_L')
+                    self.map[x_map][y_map].replace('G_L', '', 1)
         elif self.agent_state.actions['SHOOT']:
             if direction == 'UP':
                 x_wumpus = x_map
@@ -105,11 +105,11 @@ class Program:
             if x_wumpus >= 0 and x_wumpus <= 9 and y_wumpus >=0 and y_wumpus <= 9:
                 if 'W' in self.map[x_wumpus][y_wumpus]:
                     self.scream = True
-                    self.map[x_wumpus][y_wumpus].remove('W')
+                    self.map[x_wumpus][y_wumpus].replace('W', '', 1)
                 adjacent = self.get_adjacent_cells(x_wumpus, y_wumpus)
                 for i,j in adjacent:
                     if 'S' in self.map[i][j]:
-                        self.map[i][j].remove('S')
+                        self.map[i][j].replace('S', '',1)
     
     def is_cream(self):
         return self.scream

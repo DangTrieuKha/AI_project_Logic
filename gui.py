@@ -168,8 +168,8 @@ class App:
                     check = True
                 if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and check == False:
                     self.update_grid(x_u, y_u, "blue", canvas=canvas)
-                else:
-                    self.update_grid(x_u, y_u, "red", canvas=canvas)
+                #else:
+                #    self.update_grid(x_u, y_u, "yellow", canvas=canvas)
             
 
     def on_entry_click(self, event):
