@@ -26,9 +26,9 @@ class Agent:
 
         tmp = self.get_env_info()
         if tmp == 'P_G':
-            self.map_explored[self.state.position[0]][self.state.position[1]] = '-1'
+            self.map_explored[self.state.position[1] - 1][10 - self.state.position[0]] = '-1'
         else:
-            self.map_explored[self.state.position[0]][self.state.position[1]] = '0'
+            self.map_explored[self.state.position[1] - 1][10 - self.state.position[0]] = '0'
 
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
 
