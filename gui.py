@@ -71,13 +71,22 @@ class App:
     def draw_element_i(self, i, j, cell, canvas):
 
         x, y = j * self.cell_size, i * self.cell_size
+        
         if 'A' in cell:
             canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.player_image_down, anchor=CENTER)
         if 'G' in cell and 'L' not in cell and 'P' not in cell:
             canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
         
+        
         if 'W' in cell and 'H' not in cell:
-            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER)
+            w_count = cell.count('W') - cell.count('H')
+            for k in range(w_count):
+                canvas.create_image(
+                    x + self.cell_size // 2 - 10 + k * 15,  # Thêm khoảng cách 20px giữa các W
+                    y + self.cell_size // 2, 
+                    image=self.wumpus_image, 
+                    anchor=CENTER
+                )
         if 'S' in cell:
             canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
         
