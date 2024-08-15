@@ -72,6 +72,18 @@ class State:
             neighbors.append((self.position[0] + 1, self.position[1]))
         return next_location, neighbors
     
+    def get_neighbors(self):
+        neighbors = []
+        if self.position[1] < 10:
+            neighbors.append((self.position[0], self.position[1] + 1))
+        if self.position[1] > 1:
+            neighbors.append((self.position[0], self.position[1] - 1))
+        if self.position[0] > 1:
+            neighbors.append((self.position[0] - 1, self.position[1]))
+        if self.position[0] < 10:
+            neighbors.append((self.position[0] + 1, self.position[1]))
+        return neighbors
+    
     def get_next_action(self):
         if self.get_forward_location() != False:
             return 'MOVE_FORWARD'
