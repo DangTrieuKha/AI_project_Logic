@@ -48,13 +48,13 @@ class State:
         self.direction = directions[(directions.index(self.direction) + 3) % 4]
 
     def get_forward_location(self):
-        if self.direction == 'UP' and self.position[0] < 10:
+        if self.direction == 'UP' and self.position[1] < 10:
             return (self.position[0], self.position[1] + 1)
-        elif self.direction == 'DOWN' and self.position[0] > 1:
+        elif self.direction == 'DOWN' and self.position[1] > 1:
             return (self.position[0], self.position[1] - 1)
-        elif self.direction == 'LEFT' and self.position[1] > 1:
+        elif self.direction == 'LEFT' and self.position[0] > 1:
             return (self.position[0] - 1, self.position[1])
-        elif self.direction == 'RIGHT' and self.position[1] < 10:
+        elif self.direction == 'RIGHT' and self.position[0] < 10:
             return (self.position[0] + 1, self.position[1])
         else:
             return False
@@ -62,30 +62,30 @@ class State:
     def get_forward_and_neighbors(self):
         next_location = self.get_forward_location()
         neighbors = []
-        if self.position[0] < 10 and (self.position[0] + 1, self.position[1]) != next_location:
-            neighbors.append((self.position[0], self.position[1] + 1))
-        if self.position[0] > 1 and (self.position[0 - 1, self.position[1]]) != next_location:
-            neighbors.append((self.position[0], self.position[1] - 1))
-        if self.position[1] > 1 and (self.position[0], self.position[1] - 1) != next_location:
-            neighbors.append((self.position[0] - 1, self.position[1]))
         if self.position[1] < 10 and (self.position[0], self.position[1] + 1) != next_location:
+            neighbors.append((self.position[0], self.position[1] + 1))
+        if self.position[1] > 1 and (self.position[0], self.position[1] - 1) != next_location:
+            neighbors.append((self.position[0], self.position[1] - 1))
+        if self.position[0] > 1 and (self.position[0] - 1, self.position[1]) != next_location:
+            neighbors.append((self.position[0] - 1, self.position[1]))
+        if self.position[0] < 10 and (self.position[0] + 1, self.position[1]) != next_location:
             neighbors.append((self.position[0] + 1, self.position[1]))
         return next_location, neighbors
     
     def get_next_action(self):
-        if self.move_forward() != False:
+        if self.get_forward_location() != False:
             return 'MOVE_FORWARD'
         else:
-            return 'TURN_LEFT'
+            return 'TURN_RIGHT'
 
     def move_forward(self):
-        if self.direction == 'UP' and self.position[0] < 10:
+        if self.direction == 'UP' and self.position[1] < 10:
             self.position = (self.position[0], self.position[1] + 1)
-        elif self.direction == 'DOWN' and self.position[0] > 1:
+        elif self.direction == 'DOWN' and self.position[1] > 1:
             self.position = (self.position[0], self.position[1] - 1)
-        elif self.direction == 'LEFT' and self.position[1] > 1:
+        elif self.direction == 'LEFT' and self.position[0] > 1:
             self.position = (self.position[0] - 1, self.position[1])
-        elif self.direction == 'RIGHT' and self.position[1] < 10:
+        elif self.direction == 'RIGHT' and self.position[0] < 10:
             self.position = (self.position[0] + 1, self.position[1])
         else:
             return False
