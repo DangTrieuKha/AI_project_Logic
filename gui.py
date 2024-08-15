@@ -290,18 +290,20 @@ class App:
         self.run_frame = tk.Frame(self.map_agent_frame)
         self.run_frame.pack(pady=(10, 10))
         
+        # vẽ map của program
         self.program_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
         self.program_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
         self.draw_grid(self.program_canvas)
+        self.draw_elements(self.program_canvas)
         self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.program_canvas)
         self.draw_agent(self.agent.state, self.program_canvas)
 
+        # vẽ map của KB
         self.agentKB_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
         self.agentKB_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
         self.draw_grid(self.agentKB_canvas)
         self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.agentKB_canvas)
         self.draw_agent(self.agent.state, self.agentKB_canvas)
-
 
         action = self.action()
         self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white")
@@ -325,12 +327,19 @@ class App:
         self.agent.run() 
         x, y = self.agent.state.get_position()
         self.update_grid(x, y, "green", self.agentKB_canvas)
+        self.update_grid(x, y, "green", self.program_canvas)
         x_m, y_m = 10 - y, x - 1
         print(self.program.map[x_m][y_m])
         
+        # update trạng thái của agent trong map của agentKB
         self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.agentKB_canvas)
         self.draw_agent(self.agent.state, self.agentKB_canvas)
         self.draw_agentKB(self.agent.state, self.agentKB_canvas)
+
+        # update trạng thái của agent trong map của program
+        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.program_canvas)
+        self.draw_agent(self.agent.state, self.program_canvas)
+        self.draw_agentKB(self.agent.state, self.program_canvas)
 
         self.score_label.config(text=f"Score: {self.program.get_score()}")
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
