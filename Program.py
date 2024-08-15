@@ -72,14 +72,14 @@ class Program:
     def get_env_info(self):
         # Return the percepts of the current cell
         x, y = self.agent_state.get_position()
-        x_map = x - 1
-        y_map = 10 - y
+        x_map = 10 - y
+        y_map = x - 1
         return self.map[x_map][y_map]
     
     def update_map(self):
         x,y = self.agent_state.position
-        x_map = x - 1
-        y_map = 10 - y
+        x_map = 10 - y
+        y_map = x - 1
         direction = self.agent_state.direction
         if self.agent_state.actions['GRAB']:
             adjacent = self.get_adjacent_cells(x_map,y_map)
