@@ -295,14 +295,16 @@ class App:
         self.program_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
         self.draw_grid(self.program_canvas)
         self.draw_elements(self.program_canvas)
-        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.program_canvas)
+        # màu = "white" thay vì "green"
+        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "white", self.program_canvas)
         self.draw_agent(self.agent.state, self.program_canvas)
 
         # vẽ map của KB
         self.agentKB_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
         self.agentKB_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
         self.draw_grid(self.agentKB_canvas)
-        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "green", self.agentKB_canvas)
+        # màu = "white" thay vì "green"
+        self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "white", self.agentKB_canvas)
         self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         action = self.action()
@@ -326,8 +328,9 @@ class App:
     def next_step(self):
         self.agent.run() 
         x, y = self.agent.state.get_position()
-        self.update_grid(x, y, "green", self.agentKB_canvas)
-        self.update_grid(x, y, "green", self.program_canvas)
+        # màu = "white" thay vì "green"
+        self.update_grid(x, y, "white", self.agentKB_canvas)
+        self.update_grid(x, y, "white", self.program_canvas)
         x_m, y_m = 10 - y, x - 1
         print(self.program.map[x_m][y_m])
         
