@@ -362,7 +362,6 @@ class App:
 
         # update trạng thái của agent trong map của program
         self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.program_canvas)
-        self.draw_agentKB(self.agent.state, self.program_canvas)
         self.draw_agent(self.agent.state, self.program_canvas)
 
         self.score_label.config(text=f"Score: {self.program.get_score()}")
