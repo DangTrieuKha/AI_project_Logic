@@ -175,8 +175,10 @@ class App:
                     check = True
                 if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and check == False:
                     self.update_grid(x_u, y_u, "blue", canvas=canvas)
-                #else:
-                #    self.update_grid(x_u, y_u, "yellow", canvas=canvas)
+                else:
+                    self.update_grid(x_u, y_u, "white", canvas=canvas)
+        x_m, y_m = 10 - y, x - 1
+        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.agentKB_canvas)
             
 
     def on_entry_click(self, event):
@@ -307,7 +309,7 @@ class App:
         self.draw_agent(self.agent.state, self.program_canvas)
 
         # vẽ map của KB
-        self.agentKB_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
+        self.agentKB_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='gray')
         self.agentKB_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
         self.draw_grid(self.agentKB_canvas)
         # màu = "white" thay vì "green"
@@ -342,14 +344,14 @@ class App:
         print(self.program.map[x_m][y_m])
         
         # update trạng thái của agent trong map của agentKB
-        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.agentKB_canvas)
-        self.draw_agent(self.agent.state, self.agentKB_canvas)
+        
         self.draw_agentKB(self.agent.state, self.agentKB_canvas)
+        self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         # update trạng thái của agent trong map của program
         self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.program_canvas)
-        self.draw_agent(self.agent.state, self.program_canvas)
         self.draw_agentKB(self.agent.state, self.program_canvas)
+        self.draw_agent(self.agent.state, self.program_canvas)
 
         self.score_label.config(text=f"Score: {self.program.get_score()}")
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
