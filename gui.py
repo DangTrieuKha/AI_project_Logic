@@ -14,7 +14,7 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Wumpus World")
-        self.root.geometry("1280x800")
+        self.root.geometry("1280x780")
         self.cell_size = 50
     
         try:
@@ -24,8 +24,7 @@ class App:
             print(f"Không thể tải âm thanh: {e}")
             return
 
-        #self.agentKB = Agent_KB.AgentKB()
-        self.agentKB = agent_kb
+        self.agentKB = AgentKB()
         self.default_text = "Enter relative path of file..."
         
         # Frame
@@ -46,6 +45,7 @@ class App:
         self.healing_poison_image = tk.PhotoImage(file=os.path.join("Image", "healing_poison.png"))
         
         self.agentKB_list = []
+        self.path = []
 
         self.show_welcome_frame()
     
@@ -71,7 +71,6 @@ class App:
 
         tu_list = cell.split()
         n = len(tu_list)
-        print(tu_list, ' ', n)
         for i in range(n):
             if n == 1:
                 x_s, y_s = x + self.cell_size // 2, y + self.cell_size // 2
@@ -108,28 +107,6 @@ class App:
         for i, row in enumerate(self.program.map):
             for j, cell in enumerate(row):
                 self.draw_element_i(i, j, cell, 1, canvas=canvas)
-    
-    # def draw_element_agent(self, i, j, cell, canvas):
-    #     x, y = j * self.cell_size, i * self.cell_size
-
-    #     if 'G' in cell and 'L' not in cell and 'P' not in cell:
-    #         canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
-        
-    #     if 'S' in cell:
-    #         canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
-        
-    #     if 'B' in cell:
-    #         canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
-
-    #     if 'H_P' in cell:
-    #         canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
-    #     if 'G_L' in cell:
-    #         canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
-        
-    #     if 'P_G' in cell:
-    #         canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
-    #     if 'W_H' in cell:
-    #         canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
         
     
     def draw_agent(self, state, canvas):
@@ -154,13 +131,18 @@ class App:
         
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
+        list_agentKB = []
         for i in range(4):
             x1 = x + dx[i]
             y1 = y + dy[i]
-            if (x1 >= 1 and x1 <= 10 and y1 >= 1 and y1 <= 10) and (x1, y1) not in self.agentKB_list:
-                self.agentKB_list.append((x1, y1))
+            if x1 >= 1 and x1 <= 10 and y1 >= 1 and y1 <= 10:
+                if (x1, y1) not in self.path: 
+                    list_agentKB.append((x1, y1))
+                if (x1, y1) not in self.agentKB_list:
+                    self.agentKB_list.append((x1, y1))
 
-        for x1, y1 in self.agentKB_list:
+        #for x1, y1 in self.agentKB_list:
+        for x1, y1 in list_agentKB:
             x_u, y_u = copy.deepcopy(x1), copy.deepcopy(y1)
             x1 = (x1 - 1) * self.cell_size
             y1 = (10 - y1) * self.cell_size
@@ -296,6 +278,16 @@ class App:
         rows = len(self.program.map)
         cols = len(self.program.map[0])
 
+        self.map_frame = tk.Frame(self.map_agent_frame)
+        self.map_frame.pack(pady=(8, 5), fill='x')
+
+        self.left_label = tk.Label(self.map_frame, text="Environment", font=("Arial", 16))
+        self.left_label.pack(side='left', padx=(0, 0), expand=True)
+
+        self.right_label = tk.Label(self.map_frame, text="Knowledge base", font=("Arial", 16))
+        self.right_label.pack(side='right', padx=(0, 0), expand=True)
+       
+
         self.score_label = tk.Label(self.map_agent_frame, text=f"Score: {self.program.get_score}", font=("Arial", 14), bg="white")
         self.score_label.pack()
         self.score_label.config(text=f"Score: {self.program.get_score()}")
@@ -305,11 +297,11 @@ class App:
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
 
         self.run_frame = tk.Frame(self.map_agent_frame)
-        self.run_frame.pack(pady=(10, 10))
+        self.run_frame.pack(pady=(5, 5))
         
         # vẽ map của program
         self.program_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
-        self.program_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
+        self.program_canvas.pack(side='left', padx=(10, 5), pady=(5, 5))
         self.draw_grid(self.program_canvas)
         self.draw_elements(self.program_canvas)
         # màu = "white" thay vì "green"
@@ -318,11 +310,16 @@ class App:
 
         # vẽ map của KB
         self.agentKB_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='gray')
-        self.agentKB_canvas.pack(side='left', padx=(10, 5), pady=(10, 10))
+        self.agentKB_canvas.pack(side='left', padx=(10, 5), pady=(5, 5))
         self.draw_grid(self.agentKB_canvas)
         # màu = "white" thay vì "green"
         self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "white", self.agentKB_canvas)
         self.draw_agent(self.agent.state, self.agentKB_canvas)
+        x, y = self.agent.state.get_position()
+        self.path.append((x, y))
+        self.agentKB_list.append((x, y))
+        self.agentKB_list.append((x, y + 1))
+        self.agentKB_list.append((x + 1, y))
 
         action = self.action()
         self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white")
@@ -337,7 +334,7 @@ class App:
         self.auto_run_button.pack(side = tk.RIGHT, padx=(8, 10))
 
         self.button_agent_frame = tk.Frame(self.map_agent_frame)
-        self.button_agent_frame.pack(pady=(20, 20))
+        self.button_agent_frame.pack(pady=(10, 10))
 
         self.back_run = tk.Button(self.button_agent_frame, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.back_run.pack(pady=(5, 5))
@@ -345,7 +342,15 @@ class App:
     def next_step(self):
         self.agent.run() 
         x, y = self.agent.state.get_position()
+        self.path.append((x, y))
+        rows = len(self.program.map)
+        cols = len(self.program.map[0])
+        for i in range(1, rows + 1):
+            for j in range(1, cols + 1):
+                if (i, j) in self.agentKB_list:
+                    self.update_grid(i, j, "gray", self.agentKB_canvas)
         # màu = "white" thay vì "green"
+        
         self.update_grid(x, y, "white", self.agentKB_canvas)
         self.update_grid(x, y, "white", self.program_canvas)
         x_m, y_m = 10 - y, x - 1
@@ -371,7 +376,7 @@ class App:
         while True:
             self.next_step()
             self.root.update()
-            self.root.after(100)
+            self.root.after(500)
             if self.program.run() == "Finished":
                 break
 
@@ -396,19 +401,6 @@ class App:
     def reset_game(self):
         self.player_position = self.program.start
         self.draw_elements()
-
-# Khởi tạo Agent KB
-agent_kb = AgentKB()
-
-# Thêm nhận thức: có Breeze tại ô (1,1)
-agent_kb.tell('',1,1)
-# Thêm nhận thức: tại ô (1,2) có pit
-agent_kb.tell('B',4,1)
-agent_kb.tell('',2,2)
-agent_kb.tell('B',2,3)
-# Kiểm tra liệu có Pit tại (1,2)
-result_pit = agent_kb.is_there_pit(1, 2)
-print(result_pit)
     
 if __name__ == "__main__":
     root = tk.Tk()
