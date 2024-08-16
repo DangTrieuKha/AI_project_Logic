@@ -65,7 +65,7 @@ class App:
         canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="black")
 
     
-    def draw_element_i(self, i, j, cell, canvas):
+    def draw_element_i(self, i, j, cell, mode, canvas):
 
         x, y = j * self.cell_size, i * self.cell_size
 
@@ -77,7 +77,7 @@ class App:
                 x_s, y_s = x + self.cell_size // 2, y + self.cell_size // 2
             else:
                 x_s, y_s = x + self.cell_size // 2 - 10 + i * 20, y + self.cell_size // 2
-            if tu_list[i] == 'A':
+            if mode == 1 and tu_list[i] == 'A':
                 canvas.create_image(x_s, y_s, image=self.player_image_down, anchor=CENTER)
             if tu_list[i] == 'G':
                 canvas.create_image(x_s, y_s, image=self.gold_image, anchor=CENTER)
@@ -86,7 +86,7 @@ class App:
                 canvas.create_image(x_s, y_s, image=self.wumpus_image, anchor=CENTER) 
 
             if tu_list[i] == 'S':
-                canvas.create_text(x_s, y_s, text="S", fill="brown", font="Arial 12", tags="element")
+                canvas.create_text(x_s, y_s + self.cell_size // 4, text="S", fill="brown", font="Arial 12", tags="element")
             
             if tu_list[i] == 'P':
                 canvas.create_image(x_s, y_s, image=self.pit_image, anchor=CENTER)
@@ -96,40 +96,40 @@ class App:
             if tu_list[i] == 'H_P':
                 canvas.create_image(x_s, y_s, image=self.healing_poison_image, anchor=CENTER)
             if tu_list[i] == 'G_L':
-                canvas.create_text(x_s, y_s, text="G_L", fill="blue", font="Arial 12", tags="element")    
+                canvas.create_text(x_s, y_s + self.cell_size // 4, text="G_L", fill="blue", font="Arial 12", tags="element")    
             
             if tu_list[i] == 'P_G':
                 canvas.create_image(x_s, y_s, image=self.poison_image, anchor=CENTER)
             if tu_list[i] == 'W_H':
-                canvas.create_text(x_s , y_s - y_s // 2, text="W_H", fill="red", font="Arial 12", tags="element")
+                canvas.create_text(x_s , y_s - self.cell_size // 4, text="W_H", fill="red", font="Arial 12", tags="element")
 
     def draw_elements(self, canvas):
         canvas.delete("element")
         for i, row in enumerate(self.program.map):
             for j, cell in enumerate(row):
-                self.draw_element_i(i, j, cell, canvas=canvas)
+                self.draw_element_i(i, j, cell, 1, canvas=canvas)
     
-    def draw_element_agent(self, i, j, cell, canvas):
-        x, y = j * self.cell_size, i * self.cell_size
+    # def draw_element_agent(self, i, j, cell, canvas):
+    #     x, y = j * self.cell_size, i * self.cell_size
 
-        if 'G' in cell and 'L' not in cell and 'P' not in cell:
-            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
+    #     if 'G' in cell and 'L' not in cell and 'P' not in cell:
+    #         canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
         
-        if 'S' in cell:
-            canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
+    #     if 'S' in cell:
+    #         canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
         
-        if 'B' in cell:
-            canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
+    #     if 'B' in cell:
+    #         canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
 
-        if 'H_P' in cell:
-            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
-        if 'G_L' in cell:
-            canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
+    #     if 'H_P' in cell:
+    #         canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
+    #     if 'G_L' in cell:
+    #         canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
         
-        if 'P_G' in cell:
-            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
-        if 'W_H' in cell:
-            canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
+    #     if 'P_G' in cell:
+    #         canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
+    #     if 'W_H' in cell:
+    #         canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
         
     
     def draw_agent(self, state, canvas):
@@ -157,28 +157,36 @@ class App:
         for i in range(4):
             x1 = x + dx[i]
             y1 = y + dy[i]
-            self.agentKB_list.append((x1, y1))
+            if (x1 >= 1 and x1 <= 10 and y1 >= 1 and y1 <= 10) and (x1, y1) not in self.agentKB_list:
+                self.agentKB_list.append((x1, y1))
+
         for x1, y1 in self.agentKB_list:
             x_u, y_u = copy.deepcopy(x1), copy.deepcopy(y1)
-            if (x1 >= 1 and x1 <= 10 and y1 >= 1 and y1 <= 10):
-                x1 = (x1 - 1) * self.cell_size
-                y1 = (10 - y1) * self.cell_size
-                check = False
-                if self.agentKB.is_there_pit(x1, y1):
-                    canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.pit_image, anchor=CENTER, tags="agentKB")
-                    check = True
-                if self.agentKB.is_there_wumpus(x1, y1):
-                    canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER, tags="agentKB")
-                    check = True
-                if self.agentKB.is_there_poison(x1, y1):
-                    canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.poison_image, anchor=CENTER, tags="agentKB")
-                    check = True
-                if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and check == False:
-                    self.update_grid(x_u, y_u, "blue", canvas=canvas)
-                else:
-                    self.update_grid(x_u, y_u, "white", canvas=canvas)
+            x1 = (x1 - 1) * self.cell_size
+            y1 = (10 - y1) * self.cell_size
+            check = False
+            if self.agentKB.is_there_pit(x1, y1):
+                canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.pit_image, anchor=CENTER, tags="agentKB")
+                check = True
+
+            if self.agentKB.is_there_wumpus(x1, y1):
+                canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER, tags="agentKB")
+                check = True
+
+            if self.agentKB.is_there_poison(x1, y1):
+                canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.poison_image, anchor=CENTER, tags="agentKB")
+                check = True
+
+            if self.agentKB.is_there_healing(x1, y1):
+                canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER, tags="agentKB")
+                check = True
+
+            if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and check == False:
+                self.update_grid(x_u, y_u, "blue", canvas=canvas)
+            else:
+                self.update_grid(x_u, y_u, "white", canvas=canvas)
         x_m, y_m = 10 - y, x - 1
-        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.agentKB_canvas)
+        self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.agentKB_canvas)
             
 
     def on_entry_click(self, event):
@@ -341,7 +349,6 @@ class App:
         self.update_grid(x, y, "white", self.agentKB_canvas)
         self.update_grid(x, y, "white", self.program_canvas)
         x_m, y_m = 10 - y, x - 1
-        print(self.program.map[x_m][y_m])
         
         # update trạng thái của agent trong map của agentKB
         
@@ -349,7 +356,7 @@ class App:
         self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         # update trạng thái của agent trong map của program
-        self.draw_element_agent(x_m, y_m, self.program.map[x_m][y_m], self.program_canvas)
+        self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.program_canvas)
         self.draw_agentKB(self.agent.state, self.program_canvas)
         self.draw_agent(self.agent.state, self.program_canvas)
 
@@ -364,7 +371,7 @@ class App:
         while True:
             self.next_step()
             self.root.update()
-            self.root.after(200)
+            self.root.after(100)
             if self.program.run() == "Finished":
                 break
 
