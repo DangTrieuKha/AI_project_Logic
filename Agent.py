@@ -26,7 +26,7 @@ class Agent:
             return None
         
         for neighbor in self.state.get_neighbors(start[0], start[1]):
-            result = self.__recursive_dls(neighbor, goal, limit - 1)
+            result = self.__depth_limited_search(neighbor, goal, limit - 1)
             if result is not None:
                 result.append(start)
                 return result
@@ -81,6 +81,10 @@ class Agent:
 
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
 
+        if tmp == 'G':
+            self.state.act('GRAB')
+            return
+        
         if 'S' not in tmp and 'B' not in tmp:
             self.state.act(self.state.get_next_action())
             return

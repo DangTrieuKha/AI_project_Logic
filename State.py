@@ -38,6 +38,9 @@ class State:
     def healing(self):
         self.agent_health += 25
         self.agent_number_of_HL -=1
+
+    def poison(self):
+        self.agent_health -= 25
         
     def turn_left(self):
         directions = ['UP', 'LEFT', 'DOWN', 'RIGHT']
@@ -72,16 +75,20 @@ class State:
             neighbors.append((self.position[0] + 1, self.position[1]))
         return next_location, neighbors
     
-    def get_neighbors(self):
+    def get_neighbors(self, x = None, y = None):
+        if x == None:
+            x = self.position[0]
+        if y == None:
+            y = self.position[1]
         neighbors = []
         if self.position[1] < 10:
-            neighbors.append((self.position[0], self.position[1] + 1))
+            neighbors.append((x, y + 1))
         if self.position[1] > 1:
-            neighbors.append((self.position[0], self.position[1] - 1))
+            neighbors.append((x, y - 1))
         if self.position[0] > 1:
-            neighbors.append((self.position[0] - 1, self.position[1]))
+            neighbors.append((x - 1, y))
         if self.position[0] < 10:
-            neighbors.append((self.position[0] + 1, self.position[1]))
+            neighbors.append((x + 1, y))
         return neighbors
     
     def get_next_action(self):

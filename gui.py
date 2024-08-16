@@ -185,7 +185,7 @@ class App:
         if self.check_file_exists(filename):
             self.default_text = filename
             self.program = Program(self.default_text)   
-            self.agent = Agent(self.program.get_env_info, self.program.scream) 
+            self.agent = Agent(self.program.get_env_info, self.program.is_scream) 
             self.show_main_frame()
         else:
             messagebox.showerror("Error", "File not found. Please enter a valid file path.")

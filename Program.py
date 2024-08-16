@@ -7,7 +7,8 @@ class Program:
         self.agent_state = State()
         self.agent_score = 0
         self.scream = False # is there scream at current cell of agent
-    def load_map(self, map_file):
+    
+    def load_map(self, map_file) -> list[list[str]]:
         with open(map_file, 'r') as file:
             lines = file.readlines()
             n = int(lines[0])
@@ -59,7 +60,7 @@ class Program:
             elif 'G_L' not in self.map[i][j]:
                 self.map[i][j] += ' G_L'
 
-    def get_adjacent_cells(self, x, y):
+    def get_adjacent_cells(self, x, y) -> list[tuple[int, int]]:
         adjacent = []
         if x > 0:
             adjacent.append((x-1, y))
@@ -79,41 +80,52 @@ class Program:
         return self.map[x_map][y_map]
     
     def update_map(self):
-        x,y = self.agent_state.position
+        x, y = self.agent_state.position
         x_map = 10 - y
         y_map = x - 1
         direction = self.agent_state.direction
         if self.agent_state.actions['GRAB']:
             adjacent = self.get_adjacent_cells(x_map,y_map)
             if 'H_P' in self.map[x_map][y_map]:
-                self.map[x_map][y_map].replace('H_P', '', 1)
-            for i,j in adjacent:
-                if 'G_L' in self.map[x_map][y_map]:
-                    self.map[x_map][y_map].replace('G_L', '', 1)
+                self.map[x_map][y_map] = self.map[x_map][y_map].replace('H_P', '', 1)
+                
+                if 'H_P' in self.map[x_map][y_map]:
+                    return
+                
+                for i, j in adjacent:
+                    if 'G_L' in self.map[x_map][y_map]:
+                        self.map[x_map][y_map] = self.map[x_map][y_map].replace('G_L', '', 1)
+                return
+            
+            if 'G' in self.map[x_map][y_map]:
+                self.map[x_map][y_map] = self.map[x_map][y_map].replace('G', '', 1)
+                print("Gold Found!")
+                print(self.map[x_map][y_map])
+                return
         elif self.agent_state.actions['SHOOT']:
             if direction == 'UP':
-                x_wumpus = x_map
-                y_wumpus = y_map - 1
-            elif direction == 'DOWN':
-                x_wumpus = x_map
-                y_wumpus = y_map + 1
-            elif direction == 'LEFT':
                 x_wumpus = x_map - 1
                 y_wumpus = y_map
-            elif direction == 'RIGHT':
+            elif direction == 'DOWN':
                 x_wumpus = x_map + 1
                 y_wumpus = y_map
+            elif direction == 'LEFT':
+                x_wumpus = x_map
+                y_wumpus = y_map - 1
+            elif direction == 'RIGHT':
+                x_wumpus = x_map
+                y_wumpus = y_map + 1
             
             if x_wumpus >= 0 and x_wumpus <= 9 and y_wumpus >=0 and y_wumpus <= 9:
                 if 'W' in self.map[x_wumpus][y_wumpus]:
                     self.scream = True
-                    self.map[x_wumpus][y_wumpus].replace('W', '', 1)
+                    self.map[x_wumpus][y_wumpus] = self.map[x_wumpus][y_wumpus].replace('W', '', 1)
                 adjacent = self.get_adjacent_cells(x_wumpus, y_wumpus)
-                for i,j in adjacent:
+                for i_x, i_y in adjacent:
                     if 'S' in self.map[i][j]:
-                        self.map[i][j].replace('S', '',1)
+                        self.map[i_x][i_y] = self.map[i_x][i_y].replace('S', '',1)
     
-    def is_cream(self):
+    def is_scream(self):
         return self.scream
     
     def update_score(self, value):
@@ -142,7 +154,7 @@ class Program:
             #self.update_percepts()
         elif actions['GRAB']:
             self.update_score(-10)
-            if self.map[self.agent_state.get_position()[0]][self.agent_state.get_position()[1]] == 'G':
+            if self.map[10 - self.agent_state.get_position()[1]][self.agent_state.get_position()[0] - 1] == 'G':
                 self.update_score(5000)
             self.update_map()
             self.agent_state.actions['GRAB'] = False
@@ -153,5 +165,15 @@ class Program:
         elif actions['TURN_RIGHT']:
             self.update_score(-10)
             self.agent_state.actions['TURN_RIGHT'] = False
+
+        x, y = self.agent_state.get_position()
+
+        if 'W' in self.map[10 - y][x - 1] or 'P' in self.map[10 - y][x - 1]:
+            self.update_score(-10000)
+            return self.end_game()
+        elif 'P_G' in self.map[10 - y][x - 1]:
+            self.agent_state.poison()
+            return self.end_game()
+
         return False
     
