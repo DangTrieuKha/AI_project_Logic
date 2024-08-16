@@ -89,7 +89,13 @@ class Agent:
             self.state.act(self.state.get_next_action())
             return
         
-        (next_x, next_y), neighbors = self.state.get_forward_and_neighbors()
+        next, neighbors = self.state.get_forward_and_neighbors()
+        if next is False:
+            self.state.act('TURN_LEFT')
+            return
+        
+        next_x, next_y = next
+
         if self.kb.is_there_wumpus(next_x, next_y):
             for neighbor in neighbors:
                 if self.kb.is_there_not_pit(neighbor[0], neighbor[1]) and not self.is_explored(neighbor[0], neighbor[1]):

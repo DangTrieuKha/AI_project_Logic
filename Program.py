@@ -99,8 +99,6 @@ class Program:
             
             if 'G' in self.map[x_map][y_map]:
                 self.map[x_map][y_map] = self.map[x_map][y_map].replace('G', '', 1)
-                print("Gold Found!")
-                print(self.map[x_map][y_map])
                 return
         elif self.agent_state.actions['SHOOT']:
             if direction == 'UP':
@@ -122,7 +120,7 @@ class Program:
                     self.map[x_wumpus][y_wumpus] = self.map[x_wumpus][y_wumpus].replace('W', '', 1)
                 adjacent = self.get_adjacent_cells(x_wumpus, y_wumpus)
                 for i_x, i_y in adjacent:
-                    if 'S' in self.map[i][j]:
+                    if 'S' in self.map[i_x][i_y]:
                         self.map[i_x][i_y] = self.map[i_x][i_y].replace('S', '',1)
     
     def is_scream(self):
@@ -167,13 +165,18 @@ class Program:
             self.agent_state.actions['TURN_RIGHT'] = False
 
         x, y = self.agent_state.get_position()
+        print(self.map[10 - y][x - 1])
 
-        if 'W' in self.map[10 - y][x - 1] or 'P' in self.map[10 - y][x - 1]:
+        if 'W' in self.map[10 - y][x - 1]:
             self.update_score(-10000)
             return self.end_game()
-        elif 'P_G' in self.map[10 - y][x - 1]:
+        
+        for i in range(len(self.map[10 - y][x - 1])):
+            if self.map[10 - y][x - 1][i] == 'P' and self.map[10 - y][x - 1][i + 1] != '_':
+                self.update_score(-10000)
+                return self.end_game()
+        
+        if 'P_G' in self.map[10 - y][x - 1]:
             self.agent_state.poison()
-            return self.end_game()
-
+        
         return False
-    
