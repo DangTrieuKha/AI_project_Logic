@@ -20,44 +20,44 @@ class Program:
         # Update the map with percepts like Breeze, Stench, etc.
         for i in range(len(self.map)):
             for j in range(len(self.map[i])):
-                if 'W' in self.map[i][j]:
-                    w_count = self.map[i][j].count('W')
-                    for k in range(w_count):
+                tu_list = self.map[i][j].split()
+                for tu in tu_list:
+                    if tu == 'W':
                         self.add_stench(i, j)
-                elif self.map[i][j] == 'P':
-                    self.add_breeze(i, j)
-                elif self.map[i][j] == 'P_G':
-                    self.add_whiff(i, j)
-                elif self.map[i][j] == 'H_P':
-                    self.add_glow(i, j)
+                    if tu == 'P':
+                        self.add_breeze(i, j)
+                    if tu == 'P_G':
+                        self.add_whiff(i, j)
+                    if tu == 'H_P':
+                        self.add_glow(i, j)
 
     def add_stench(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
             if self.map[i][j] == '-':
                 self.map[i][j] = 'S'
             elif 'S' not in self.map[i][j]:
-                self.map[i][j] += 'S'
+                self.map[i][j] += ' S'
 
     def add_breeze(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
             if self.map[i][j] == '-':
                 self.map[i][j] = 'B'
             elif 'B' not in self.map[i][j]:
-                self.map[i][j] += 'B'
+                self.map[i][j] += ' B'
 
     def add_whiff(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
             if self.map[i][j] == '-':
                 self.map[i][j] = 'W_H'
             elif 'W' not in self.map[i][j]:
-                self.map[i][j] += 'W_H'
+                self.map[i][j] += ' W_H'
 
     def add_glow(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
             if self.map[i][j] == '-':
                 self.map[i][j] = 'G_L'
             elif 'G_L' not in self.map[i][j]:
-                self.map[i][j] += 'G_L'
+                self.map[i][j] += ' G_L'
 
     def get_adjacent_cells(self, x, y):
         adjacent = []

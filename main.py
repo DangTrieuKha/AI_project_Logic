@@ -3,8 +3,9 @@ from Program import *
 from Agent import *
 
 def main():
-    program = Program('map.txt')
-    agent = Agent(program.get_env_info)
+    program = Program('map1.txt')
+    print(program.map)
+    agent = Agent(program.get_env_info, program.is_scream)
     while True:
         agent.run()
         if program.run() == "Finished":

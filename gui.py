@@ -10,14 +10,11 @@ from State import State
 from Agent_KB import AgentKB
 from Agent import Agent
 
-# Constants
-CELL_SIZE = 64
-
 class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Wumpus World")
-        self.root.geometry("700x700")
+        self.root.geometry("1280x800")
         self.cell_size = 50
     
         try:
@@ -71,39 +68,40 @@ class App:
     def draw_element_i(self, i, j, cell, canvas):
 
         x, y = j * self.cell_size, i * self.cell_size
-        
-        if 'A' in cell:
-            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.player_image_down, anchor=CENTER)
-        if 'G' in cell and 'L' not in cell and 'P' not in cell:
-            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.gold_image, anchor=CENTER)
-        
-        
-        if 'W' in cell and 'H' not in cell:
-            w_count = cell.count('W') - cell.count('H')
-            for k in range(w_count):
-                canvas.create_image(
-                    x + self.cell_size // 2 - 10 + k * 15,  # Thêm khoảng cách 20px giữa các W
-                    y + self.cell_size // 2, 
-                    image=self.wumpus_image, 
-                    anchor=CENTER
-                )
-        if 'S' in cell:
-            canvas.create_text(x + self.cell_size // 2 + self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="S", fill="red", font="Arial 12", tags="element")
-        
-        if 'P' in cell and 'G' not in cell and 'H' not in cell:
-            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.pit_image, anchor=CENTER)
-        if 'B' in cell:
-            canvas.create_text(x + self.cell_size // 2 - self.cell_size // 4, y + self.cell_size // 2 - self.cell_size // 4, text="B", fill="red", font="Arial 12", tags="element")
 
-        if 'H_P' in cell:
-            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER)
-        if 'G_L' in cell:
-            canvas.create_text(x + self.cell_size // 2, y + self.cell_size // 2, text="G_L", fill="red", font="Arial 12", tags="element")    
-        
-        if 'P_G' in cell:
-            canvas.create_image(x + self.cell_size // 2, y + self.cell_size // 2, image=self.poison_image, anchor=CENTER)
-        if 'W_H' in cell:
-            canvas.create_text(x + self.cell_size // 2 , y + self.cell_size // 2, text="W_H", fill="red", font="Arial 12", tags="element")
+        tu_list = cell.split()
+        n = len(tu_list)
+        print(tu_list, ' ', n)
+        for i in range(n):
+            if n == 1:
+                x_s, y_s = x + self.cell_size // 2, y + self.cell_size // 2
+            else:
+                x_s, y_s = x + self.cell_size // 2 - 10 + i * 20, y + self.cell_size // 2
+            if tu_list[i] == 'A':
+                canvas.create_image(x_s, y_s, image=self.player_image_down, anchor=CENTER)
+            if tu_list[i] == 'G':
+                canvas.create_image(x_s, y_s, image=self.gold_image, anchor=CENTER)
+            
+            if tu_list[i] == 'W':
+                canvas.create_image(x_s, y_s, image=self.wumpus_image, anchor=CENTER) 
+
+            if tu_list[i] == 'S':
+                canvas.create_text(x_s, y_s, text="S", fill="brown", font="Arial 12", tags="element")
+            
+            if tu_list[i] == 'P':
+                canvas.create_image(x_s, y_s, image=self.pit_image, anchor=CENTER)
+            if tu_list[i] == 'B':
+                canvas.create_text(x_s, y_s, text="B", fill="green", font="Arial 12", tags="element")
+
+            if tu_list[i] == 'H_P':
+                canvas.create_image(x_s, y_s, image=self.healing_poison_image, anchor=CENTER)
+            if tu_list[i] == 'G_L':
+                canvas.create_text(x_s, y_s, text="G_L", fill="blue", font="Arial 12", tags="element")    
+            
+            if tu_list[i] == 'P_G':
+                canvas.create_image(x_s, y_s, image=self.poison_image, anchor=CENTER)
+            if tu_list[i] == 'W_H':
+                canvas.create_text(x_s , y_s - y_s // 2, text="W_H", fill="red", font="Arial 12", tags="element")
 
     def draw_elements(self, canvas):
         canvas.delete("element")
