@@ -292,6 +292,26 @@ class AgentKB:
         query = [self.neg_literal_healing(x, y)]
         result = self.ask(query)
         return result
+    def is_there_stench(self,x,y):
+        query = [self.pos_literal_stench(x, y)]
+        result = self.ask(query)
+        return result
+    def is_there_not_stench(self,x,y):
+        query = [self.neg_literal_stench(x, y)]
+        result = self.ask(query)
+        return result
+    def is_there_glow(self,x,y):
+        query = [self.pos_literal_glow(x, y)]
+        result = self.ask(query)
+        return result
+    def is_there_not_glow(self,x,y):
+        query = [self.neg_literal_glow(x, y)]
+        result = self.ask(query)
+        return result
+
+
+
+
 
 # # Khởi tạo Agent KB
 # agent_kb = AgentKB()
