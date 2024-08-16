@@ -20,8 +20,10 @@ class Program:
         # Update the map with percepts like Breeze, Stench, etc.
         for i in range(len(self.map)):
             for j in range(len(self.map[i])):
-                if self.map[i][j] == 'W':
-                    self.add_stench(i, j)
+                if 'W' in self.map[i][j]:
+                    w_count = self.map[i][j].count('W')
+                    for k in range(w_count):
+                        self.add_stench(i, j)
                 elif self.map[i][j] == 'P':
                     self.add_breeze(i, j)
                 elif self.map[i][j] == 'P_G':

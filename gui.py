@@ -195,7 +195,7 @@ class App:
         if self.check_file_exists(filename):
             self.default_text = filename
             self.program = Program(self.default_text)   
-            self.agent = Agent(self.program.get_env_info) 
+            self.agent = Agent(self.program.get_env_info, self.program.scream) 
             self.show_main_frame()
         else:
             messagebox.showerror("Error", "File not found. Please enter a valid file path.")
@@ -364,7 +364,7 @@ class App:
         while True:
             self.next_step()
             self.root.update()
-            self.root.after(500)
+            self.root.after(200)
             if self.program.run() == "Finished":
                 break
 
