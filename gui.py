@@ -33,6 +33,7 @@ class App:
         self.main_frame = tk.Frame(self.root)
         self.map_frame = tk.Frame(self.root)
         self.map_agent_frame = tk.Frame(self.root)
+        self.end_frame = tk.Frame(self.root)
 
         # Load images
         self.player_image_up = tk.PhotoImage(file=os.path.join("Image", "agent_up.png"))
@@ -258,6 +259,10 @@ class App:
         self.default_input_text = "Enter relative path of file..."
         self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
         self.exit_main.pack(pady=(5, 5))
+
+        # [DEBUG ONLY, COMMENT OR DELETE WHEN DONE] show end game frame through button
+        # self.endgame_button = tk.Button(self.button_mainframe, text="End Game", command=self.show_end_frame, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        # self.endgame_button.pack(pady=(5, 5))
     
     def show_map(self):
         self.hidden_all_frame()
@@ -352,8 +357,33 @@ class App:
         self.button_agent_frame = tk.Frame(self.map_agent_frame)
         self.button_agent_frame.pack(pady=(10, 10))
 
-        self.back_run = tk.Button(self.button_agent_frame, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.back_run = tk.Button(self.button_agent_frame, text="Back", command=self.back_button_behavior, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.back_run.pack(pady=(5, 5))
+
+    def back_button_behavior(self):
+        if self.program.run() == "Finished":
+            # nếu chạy self.program.run để lấy trạng thái kết thúc game
+            # thì sẽ bị tăng thêm 10đ do CLIMB
+            # nên cần trừ đi 10đ
+            self.program.update_score(-10) 
+            return self.show_end_frame()
+        else:
+            return self.show_main_frame()
+
+    def show_end_frame(self):
+        self.hidden_all_frame()
+        self.clear_frame(self.end_frame)
+        self.end_frame.pack(expand=True, anchor='center')
+
+        self.end_label = tk.Label(self.end_frame, text="Game Over", font=("Arial", 16), fg="black")
+        self.end_label.pack(pady=(10, 10))
+
+        self.score_label = tk.Label(self.end_frame, text=f"Score: {self.program.get_score()}", font=("Arial", 16), fg="black")
+        self.score_label.pack(pady=(10, 10))
+        self.score_label.config(text=f"Score: {self.program.get_score()}")
+
+        self.back_welcome_frame = tk.Button(self.end_frame, text="Back to Welcome Screen", command=self.show_welcome_frame, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.back_welcome_frame.pack(pady=(10, 10))
 
     def next_step(self):
         self.agent.run() 
@@ -384,11 +414,13 @@ class App:
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
         self.action_label.config(text=f"Action: {self.action()}")
         if self.program.run() == "Finished":
-            self.program.end_game()
+            # self.next_step_button.config(state="disabled")
+            # self.auto_run_button.config(state="disabled")
+            self.show_end_frame()
 
-    
     def auto_run(self):
         while True:
+            # self.auto_run_button.config(state="disabled")
             self.next_step()
             self.root.update()
             self.root.after(500)
