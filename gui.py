@@ -25,7 +25,8 @@ class App:
             return
 
         self.agentKB = AgentKB()
-        self.default_text = "Enter relative path of file..."
+        self.default_input_text = "Enter relative path of file..."
+        self.default_text = None
         
         # Frame
         self.welcome_frame = tk.Frame(self.root)
@@ -163,7 +164,15 @@ class App:
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER, tags="agentKB")
                 check = True
 
-            if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and check == False:
+            if self.agentKB.is_there_glow(x1, y1):
+                canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="G_L", fill="blue", font="Arial 12", tags="agentKB")
+                check = True
+            
+            if self.agentKB.is_there_stench(x1, y1):
+                canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="B", fill="green", font="Arial 12", tags="agentKB")
+                check = True
+
+            if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and self.agentKB.is_there_not_glow(x1, y1) and self.agentKB.is_there_not_stench and check == False:
                 self.update_grid(x_u, y_u, "blue", canvas=canvas)
             else:
                 self.update_grid(x_u, y_u, "white", canvas=canvas)
@@ -172,20 +181,20 @@ class App:
             
 
     def on_entry_click(self, event):
-        if self.entry.get() == self.default_text:
+        if self.entry.get() == self.default_input_text:
             self.entry.delete(0, tk.END)
             self.entry.config(fg="black")
 
     def on_entry_focus_out(self, event):
         if self.entry.get() == "":
-            self.entry.insert(0, self.default_text)
+            self.entry.insert(0, self.default_input_text)
             self.entry.config(fg="gray")
     def enter_input(self):
         filename = self.entry.get()
         if self.check_file_exists(filename):
             self.default_text = filename
-            self.program = Program(self.default_text)   
-            self.agent = Agent(self.program.get_env_info, self.program.is_scream) 
+            self.program = Program(self.default_text)
+            self.agent = Agent(self.program.get_env_info, self.program.is_scream)
             self.show_main_frame()
         else:
             messagebox.showerror("Error", "File not found. Please enter a valid file path.")
@@ -214,7 +223,7 @@ class App:
 
         # Tạo entry và đặt nó trong frame con
         self.entry = tk.Entry(self.entry_frame, fg="gray", width=50, justify="left", bg="white", highlightbackground="#2F4F4F")
-        self.entry.insert(0, self.default_text)
+        self.entry.insert(0, self.default_input_text)
         self.entry.bind("<FocusIn>", self.on_entry_click)
         self.entry.bind("<FocusOut>", self.on_entry_focus_out)
         self.entry.pack(side='left', padx=(0, 5), fill='x', expand=True)
@@ -236,6 +245,7 @@ class App:
         self.clear_frame(self.main_frame)
         self.main_frame.pack(expand=True, anchor='center')
 
+        
         self.button_mainframe = tk.Frame(self.main_frame)
         self.button_mainframe.pack(pady=(40, 40))
 
@@ -246,7 +256,7 @@ class App:
         self.run_button = tk.Button(self.button_mainframe, text="Run", command=self.show_map_agent, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.run_button.pack(pady=(5, 5))
 
-        self.default_text = "Enter relative path of file..."
+        self.default_input_text = "Enter relative path of file..."
         self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
         self.exit_main.pack(pady=(5, 5))
     
@@ -254,6 +264,10 @@ class App:
         self.hidden_all_frame()
         self.clear_frame(self.map_frame)
         self.map_frame.pack(expand=True, anchor='center')
+
+        self.program = Program(self.default_text)
+        self.agent = Agent(self.program.get_env_info, self.program.is_scream)
+
 
         rows = len(self.program.map)
         cols = len(self.program.map[0])
@@ -275,16 +289,19 @@ class App:
         self.clear_frame(self.map_agent_frame)
         self.map_agent_frame.pack(expand=True, anchor='center')
 
+        self.program = Program(self.default_text)
+        self.agent = Agent(self.program.get_env_info, self.program.is_scream)
+
         rows = len(self.program.map)
         cols = len(self.program.map[0])
 
-        self.map_frame = tk.Frame(self.map_agent_frame)
-        self.map_frame.pack(pady=(8, 5), fill='x')
+        self.map_environment_frame = tk.Frame(self.map_agent_frame)
+        self.map_environment_frame.pack(pady=(8, 5), fill='x')
 
-        self.left_label = tk.Label(self.map_frame, text="Environment", font=("Arial", 16))
+        self.left_label = tk.Label(self.map_environment_frame, text="Environment", font=("Arial", 16))
         self.left_label.pack(side='left', padx=(0, 0), expand=True)
 
-        self.right_label = tk.Label(self.map_frame, text="Knowledge base", font=("Arial", 16))
+        self.right_label = tk.Label(self.map_environment_frame, text="Knowledge base", font=("Arial", 16))
         self.right_label.pack(side='right', padx=(0, 0), expand=True)
        
 
@@ -324,7 +341,7 @@ class App:
         action = self.action()
         self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white")
         self.action_label.pack()
-        self.score_label.config(text=f"Heal: {action}")
+        self.score_label.config(text=f"Action: {action}")
 
         self.button_frame_step_2 = tk.Frame(self.map_agent_frame)
         self.button_frame_step_2.pack(pady=(10, 10))
