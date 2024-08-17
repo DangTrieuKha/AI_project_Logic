@@ -137,8 +137,7 @@ class App:
             x1 = x + dx[i]
             y1 = y + dy[i]
             if x1 >= 1 and x1 <= 10 and y1 >= 1 and y1 <= 10:
-                if (x1, y1) not in self.path: 
-                    list_agentKB.append((x1, y1))
+                list_agentKB.append((x1, y1))
                 if (x1, y1) not in self.agentKB_list:
                     self.agentKB_list.append((x1, y1))
 
@@ -359,7 +358,7 @@ class App:
     def next_step(self):
         self.agent.run() 
         x, y = self.agent.state.get_position()
-        self.path.append((x, y))
+        #self.path.append((x, y))
         rows = len(self.program.map)
         cols = len(self.program.map[0])
         for i in range(1, rows + 1):
