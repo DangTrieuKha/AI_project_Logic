@@ -11,12 +11,19 @@ class Agent:
         self.pending_position = {(1, 2)}
         self.pending_actions = []
         self.map_explored = [['-1' for _ in range(10)] for _ in range(10)]
+        self.visited = {(1, 1)}    # = set(): Set of visited positions
 
-    def update_map_explored(self, value):
-        self.map_explored[self.state.position[1] - 1][10 - self.state.position[0]] = value
+    def update_map_explored(self, value, x=None, y=None):
+        if x is not None and y is not None:
+            self.map_explored[10 - y][x - 1] = value
+            return
+        self.map_explored[10 - self.state.position[1]][self.state.position[0] - 1] = value
     
     def is_explored(self, x, y):
-        return self.map_explored[y - 1][10 - x] == '0'
+        return self.map_explored[10 - y][x - 1] == '0'
+    
+    def __is_cyclic(self, path):
+        return len(path) != len(set(path))
 
     def __depth_limited_search(self, start, goal, limit):
         if start == goal:
@@ -26,45 +33,82 @@ class Agent:
             return None
         
         for neighbor in self.state.get_neighbors(start[0], start[1]):
+            if not self.is_explored(neighbor[0], neighbor[1]):
+                continue
             result = self.__depth_limited_search(neighbor, goal, limit - 1)
             if result is not None:
                 result.append(start)
-                return result
+                if not self.__is_cyclic(result):
+                    return result
         
         return None
     
     def __iterative_deepening_search(self, start, goal):
         limit = 1
-        while True:
+        while limit < 50:
             result = self.__depth_limited_search(start, goal, limit)
             if result is not None:
                 return result
             limit += 1
 
     def __get_path(self, start, goal):
-        return self.__iterative_deepening_search(start, goal)
+        for line in self.map_explored:
+            print(line)
+        print(self.pending_position)
+        print(start, goal)
+        result = self.__iterative_deepening_search(start, goal)[::-1]
+        print(result)
+        return result
 
     def __path_to_actions(self, path):
         actions = []
+        current_direction = self.state.direction
         for i in range(len(path) - 1):
-            if path[i][0] == path[i + 1][0] and path[i][1] == path[i + 1][1] + 1:
-                actions.append('MOVE_FORWARD')
-            elif path[i][0] == path[i + 1][0] and path[i][1] == path[i + 1][1] - 1:
-                actions.append('TURN_LEFT')
-                actions.append('TURN_LEFT')
-                actions.append('MOVE_FORWARD')
-            elif path[i][0] == path[i + 1][0] + 1 and path[i][1] == path[i + 1][1]:
-                actions.append('TURN_LEFT')
-                actions.append('MOVE_FORWARD')
-            elif path[i][0] == path[i + 1][0] - 1 and path[i][1] == path[i + 1][1]:
-                actions.append('TURN_RIGHT')
-                actions.append('MOVE_FORWARD')
+            if path[i][0] == path[i + 1][0]:
+                if path[i][1] < path[i + 1][1]:
+                    if current_direction == 'LEFT':
+                        actions.append('TURN_RIGHT')
+                    elif current_direction == 'RIGHT':
+                        actions.append('TURN_LEFT')
+                    elif current_direction == 'DOWN':
+                        actions.append('TURN_RIGHT')
+                        actions.append('TURN_RIGHT')
+                    current_direction = 'UP'
+                else:
+                    if current_direction == 'LEFT':
+                        actions.append('TURN_LEFT')
+                    elif current_direction == 'RIGHT':
+                        actions.append('TURN_RIGHT')
+                    elif current_direction == 'UP':
+                        actions.append('TURN_RIGHT')
+                        actions.append('TURN_RIGHT')
+                    current_direction = 'DOWN'
+            else:
+                if path[i][0] < path[i + 1][0]:
+                    if current_direction == 'UP':
+                        actions.append('TURN_RIGHT')
+                    elif current_direction == 'DOWN':
+                        actions.append('TURN_LEFT')
+                    elif current_direction == 'LEFT':
+                        actions.append('TURN_RIGHT')
+                        actions.append('TURN_RIGHT')
+                    current_direction = 'RIGHT'
+                else:
+                    if current_direction == 'UP':
+                        actions.append('TURN_LEFT')
+                    elif current_direction == 'DOWN':
+                        actions.append('TURN_RIGHT')
+                    elif current_direction == 'RIGHT':
+                        actions.append('TURN_RIGHT')
+                        actions.append('TURN_RIGHT')
+                    current_direction = 'LEFT'
+            actions.append('MOVE_FORWARD')
         return actions
 
     def __evaluate_cost(self, list_actions):
-        return 10 * len(list_actions)
+        return 10 * len(list_actions) if list_actions is not None else 10000
 
-    def run(self):
+    def move(self):
         if self.state.agent_health == 25:
             self.state.act('HEAL')
             return
@@ -85,35 +129,27 @@ class Agent:
             self.state.act('GRAB')
             return
         
+        next, neighbors = self.state.get_forward_and_neighbors()
+        
+        if next in self.visited:
+            self.state.act('TURN_RIGHT')
+            return
+        
         if 'S' not in tmp and 'B' not in tmp:
             self.state.act(self.state.get_next_action())
+            for neighbor in neighbors:
+                if self.is_explored(neighbor[0], neighbor[1]):
+                    continue
+                
+                self.update_map_explored('0', neighbor[0], neighbor[1])
+
+                if neighbor not in self.visited:
+                    self.pending_position.add(neighbor)
             return
-        
-        next, neighbors = self.state.get_forward_and_neighbors()
-        if next is False:
-            self.state.act('TURN_LEFT')
-            return
-        
+
         next_x, next_y = next
 
         if self.kb.is_there_wumpus(next_x, next_y):
-            for neighbor in neighbors:
-                if self.kb.is_there_not_pit(neighbor[0], neighbor[1]) and not self.is_explored(neighbor[0], neighbor[1]):
-                    self.pending_position.add(neighbor)
-
-            min_cost = 100
-            min_actions = None
-            for position in self.pending_position:
-                path = self.__get_path(self.state.position, position)
-                actions = self.__path_to_actions(path)
-                cost = self.__evaluate_cost(actions)
-                if cost < min_cost:
-                    min_cost = cost
-                    min_actions = actions
-            if min_actions is not None:
-                self.pending_actions = min_actions
-                return
-
             if self.kb.is_there_not_pit(next_x, next_y):
                 self.state.act('SHOOT')
                 if not self.is_scream():
@@ -122,6 +158,34 @@ class Agent:
                     self.pending_actions.append('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
                 return
+            
+            for neighbor in neighbors:
+                if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
+                    continue
+                if self.is_explored(neighbor[0], neighbor[1]):
+                    continue
+
+                self.update_map_explored('0', neighbor[0], neighbor[1])
+
+                if neighbor not in self.visited:
+                    self.pending_position.add(neighbor)
+
+            position = list(self.pending_position)[-1]
+            self.pending_position.remove(position)
+            path = self.__get_path(self.state.position, position)
+            actions = self.__path_to_actions(path)
+            cost = self.__evaluate_cost(actions)
+
+            if cost < 110:
+                self.pending_actions = actions
+                self.run()
+                return
+            else:
+                self.state.act('SHOOT')
+                if not self.is_scream():
+                    self.pending_actions.append('MOVE_FORWARD')
+                else:
+                    self.pending_actions.append('SHOOT')
 
         elif self.kb.is_there_not_wumpus(next_x, next_y):
             if self.kb.is_there_not_pit(next_x, next_y):
@@ -129,22 +193,26 @@ class Agent:
                 return
 
             for neighbor in neighbors:
-                if self.kb.is_there_not_pit(neighbor[0], neighbor[1]) and not self.is_explored(neighbor[0], neighbor[1]):
+                if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
+                    continue
+                if self.is_explored(neighbor[0], neighbor[1]):
+                    continue
+
+                self.update_map_explored('0', neighbor[0], neighbor[1])
+                
+                if neighbor not in self.visited:
                     self.pending_position.add(neighbor)
             
-            min_cost = 100
-            min_actions = None
-            for position in self.pending_position:
+            if self.pending_position != set():
+                position = list(self.pending_position)[-1]
+                self.pending_position.remove(position)
                 path = self.__get_path(self.state.position, position)
                 actions = self.__path_to_actions(path)
                 cost = self.__evaluate_cost(actions)
-                if cost < min_cost:
-                    min_cost = cost
-                    min_actions = actions
-            if min_actions is not None:
-                self.pending_actions = min_actions
-                return
 
+                self.pending_actions = actions if actions is not None else []
+                self.run()
+                return
         else:
             if tmp == 'S':
                 self.state.act('SHOOT')
@@ -156,34 +224,55 @@ class Agent:
             
             if tmp == 'B':
                 for neighbor in neighbors:
-                    if self.kb.is_there_not_pit(neighbor[0], neighbor[1]) and not self.is_explored(neighbor[0], neighbor[1]):
+                    if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
+                        continue
+                    if self.is_explored(neighbor[0], neighbor[1]):
+                        continue
+
+                    self.update_map_explored('0', neighbor[0], neighbor[1])
+                    
+                    if neighbor not in self.visited:
                         self.pending_position.add(neighbor)
 
-                min_cost = 100
-                min_actions = None
-                for position in self.pending_position:
-                    path = self.__get_path(self.state.position, position)
-                    actions = self.__path_to_actions(path)
-                    cost = self.__evaluate_cost(actions)
-                    if cost < min_cost:
-                        min_cost = cost
-                        min_actions = actions
-                if min_actions is not None:
-                    self.pending_actions = min_actions
-                    return
+                position = list(self.pending_position)[-1]
+                self.pending_position.remove(position)
+                path = self.__get_path(self.state.position, position)
+                actions = self.__path_to_actions(path)
+                cost = self.__evaluate_cost(actions)
+
+                self.pending_actions = actions
+                self.run()
+                return
 
             if tmp == 'W':
                 for neighbor in neighbors:
-                    if self.kb.is_there_not_pit(neighbor[0], neighbor[1]) and not self.is_explored(neighbor[0], neighbor[1]):
+                    if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
+                        continue
+                    if self.is_explored(neighbor[0], neighbor[1]):
+                        continue
+
+                    self.update_map_explored('0', neighbor[0], neighbor[1])
+                    
+                    if neighbor not in self.visited:
                         self.pending_position.add(neighbor)
 
-                for position in self.pending_position:
-                    path = self.__get_path(self.state.position, position)
-                    actions = self.__path_to_actions(path)
-                    cost = self.__evaluate_cost(actions)
-                    if cost < min_cost:
-                        min_cost = cost
-                        min_actions = actions
+                position = list(self.pending_position)[-1]
+                self.pending_position.remove(position)
+                path = self.__get_path(self.state.position, position)
+                actions = self.__path_to_actions(path)
+                cost = self.__evaluate_cost(actions)
+
+                if cost < 110:
+                    self.pending_actions = actions
+                    self.run()
+                    return
+                else:
+                    self.state.act('SHOOT')
+                    if not self.is_scream():
+                        self.pending_actions.append('MOVE_FORWARD')
+                    else:
+                        self.pending_actions.append('SHOOT')
+                    return
 
             if tmp == 'G_L':
                 # Implement logic to go around to grab the healing potion
@@ -201,3 +290,10 @@ class Agent:
         actions = self.__path_to_actions(path)
         self.pending_actions = actions
         self.pending_actions.append('CLIMB')
+
+    def update_visited(self):
+        self.visited.add(self.state.position)
+
+    def run(self):
+        self.move()
+        self.update_visited()

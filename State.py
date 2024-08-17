@@ -81,13 +81,13 @@ class State:
         if y == None:
             y = self.position[1]
         neighbors = []
-        if self.position[1] < 10:
+        if y < 10:
             neighbors.append((x, y + 1))
-        if self.position[1] > 1:
+        if y > 1:
             neighbors.append((x, y - 1))
-        if self.position[0] > 1:
+        if x > 1:
             neighbors.append((x - 1, y))
-        if self.position[0] < 10:
+        if x < 10:
             neighbors.append((x + 1, y))
         return neighbors
     
