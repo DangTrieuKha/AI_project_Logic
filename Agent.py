@@ -118,16 +118,18 @@ class Agent:
             return
 
         tmp = self.get_env_info()
-        if tmp == 'P_G':
-            self.update_map_explored('-1')
-        else:
-            self.update_map_explored('0')
-
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
 
-        if tmp == 'G':
-            self.state.act('GRAB')
-            return
+        if 'P_G' in tmp:
+            self.update_map_explored('-1')
+            if 'G' in tmp and tmp.index('G') != tmp.index('P_G') + 2:
+                self.state.act('GRAB')
+                return
+        else:
+            self.update_map_explored('0')
+            if 'G' in tmp:
+                self.state.act('GRAB')
+                return
         
         next, neighbors = self.state.get_forward_and_neighbors()
         
@@ -138,6 +140,8 @@ class Agent:
         if 'S' not in tmp and 'B' not in tmp:
             self.state.act(self.state.get_next_action())
             for neighbor in neighbors:
+                if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
+                    continue
                 if self.is_explored(neighbor[0], neighbor[1]):
                     continue
                 
@@ -146,10 +150,11 @@ class Agent:
                 if neighbor not in self.visited:
                     self.pending_position.add(neighbor)
             return
-
+        
         next_x, next_y = next
 
         if self.kb.is_there_wumpus(next_x, next_y):
+            print(tmp)
             if self.kb.is_there_not_pit(next_x, next_y):
                 self.state.act('SHOOT')
                 if not self.is_scream():
@@ -158,23 +163,13 @@ class Agent:
                     self.pending_actions.append('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
                 return
-            
-            for neighbor in neighbors:
-                if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
-                    continue
-                if self.is_explored(neighbor[0], neighbor[1]):
-                    continue
 
-                self.update_map_explored('0', neighbor[0], neighbor[1])
-
-                if neighbor not in self.visited:
-                    self.pending_position.add(neighbor)
-
-            position = list(self.pending_position)[-1]
-            self.pending_position.remove(position)
-            path = self.__get_path(self.state.position, position)
-            actions = self.__path_to_actions(path)
-            cost = self.__evaluate_cost(actions)
+            if self.pending_position != set():
+                position = list(self.pending_position)[-1]
+                self.pending_position.remove(position)
+                path = self.__get_path(self.state.position, position)
+                actions = self.__path_to_actions(path)
+                cost = self.__evaluate_cost(actions)
 
             if cost < 110:
                 self.pending_actions = actions
@@ -191,17 +186,6 @@ class Agent:
             if self.kb.is_there_not_pit(next_x, next_y):
                 self.state.act('MOVE_FORWARD')
                 return
-
-            for neighbor in neighbors:
-                if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
-                    continue
-                if self.is_explored(neighbor[0], neighbor[1]):
-                    continue
-
-                self.update_map_explored('0', neighbor[0], neighbor[1])
-                
-                if neighbor not in self.visited:
-                    self.pending_position.add(neighbor)
             
             if self.pending_position != set():
                 position = list(self.pending_position)[-1]
@@ -214,7 +198,8 @@ class Agent:
                 self.run()
                 return
         else:
-            if tmp == 'S':
+            if 'S' in tmp:
+                print('It goes here')
                 self.state.act('SHOOT')
                 if not self.is_scream():
                     self.pending_actions.append('MOVE_FORWARD')
@@ -222,63 +207,24 @@ class Agent:
                     self.pending_actions.append('SHOOT')
                 return
             
-            if tmp == 'B':
-                for neighbor in neighbors:
-                    if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
-                        continue
-                    if self.is_explored(neighbor[0], neighbor[1]):
-                        continue
+            if 'B' in tmp:
 
-                    self.update_map_explored('0', neighbor[0], neighbor[1])
-                    
-                    if neighbor not in self.visited:
-                        self.pending_position.add(neighbor)
-
-                position = list(self.pending_position)[-1]
-                self.pending_position.remove(position)
-                path = self.__get_path(self.state.position, position)
-                actions = self.__path_to_actions(path)
-                cost = self.__evaluate_cost(actions)
+                if self.pending_position != set():
+                    position = list(self.pending_position)[-1]
+                    self.pending_position.remove(position)
+                    path = self.__get_path(self.state.position, position)
+                    actions = self.__path_to_actions(path)
+                    cost = self.__evaluate_cost(actions)
 
                 self.pending_actions = actions
                 self.run()
                 return
 
-            if tmp == 'W':
-                for neighbor in neighbors:
-                    if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
-                        continue
-                    if self.is_explored(neighbor[0], neighbor[1]):
-                        continue
-
-                    self.update_map_explored('0', neighbor[0], neighbor[1])
-                    
-                    if neighbor not in self.visited:
-                        self.pending_position.add(neighbor)
-
-                position = list(self.pending_position)[-1]
-                self.pending_position.remove(position)
-                path = self.__get_path(self.state.position, position)
-                actions = self.__path_to_actions(path)
-                cost = self.__evaluate_cost(actions)
-
-                if cost < 110:
-                    self.pending_actions = actions
-                    self.run()
-                    return
-                else:
-                    self.state.act('SHOOT')
-                    if not self.is_scream():
-                        self.pending_actions.append('MOVE_FORWARD')
-                    else:
-                        self.pending_actions.append('SHOOT')
-                    return
-
-            if tmp == 'G_L':
+            if 'G_L' in tmp:
                 # Implement logic to go around to grab the healing potion
                 return
             
-            if tmp == 'H_P':
+            if 'H_P' in tmp:
                 self.state.act('GRAB')
                 return
             
