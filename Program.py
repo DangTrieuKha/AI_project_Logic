@@ -123,8 +123,8 @@ class Program:
                     if 'S' in self.map[i_x][i_y]:
                         adjacent_stench = self.get_adjacent_cells(i_x,i_y)
                         check_not_wumpus = True
-                        for cell in adjacent_stench:
-                            if 'W' in cell:
+                        for cell_x,cell_y in adjacent_stench:
+                            if 'W' in self.map[cell_x][cell_y]:
                                 check_not_wumpus = False
                         if check_not_wumpus:
                             self.map[i_x][i_y] = self.map[i_x][i_y].replace('S', '',1)
