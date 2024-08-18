@@ -125,6 +125,7 @@ class AgentKB:
             self.add_single_clause(self.pos_literal_reliable_stench(x,y))
 
         if 'W_H' in percepts:
+            tmp = []
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]

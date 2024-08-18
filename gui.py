@@ -417,10 +417,7 @@ class App:
         self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         # update trạng thái của agent trong map của program
-        #self.program_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
-        #self.program_canvas.pack(side='left', padx=(10, 5), pady=(5, 5))
-        #self.draw_grid(self.program_canvas)
-        #self.draw_elements(self.program_canvas, 0)
+
 
         self.draw_agent(self.agent.state, self.program_canvas)
         
