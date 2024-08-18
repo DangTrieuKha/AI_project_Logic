@@ -288,7 +288,7 @@ class App:
         self.canvas.pack(pady=(10, 10))
 
         self.draw_grid(canvas=self.canvas)
-        self.draw_elements(canvas=self.canvas)
+        self.draw_elements(canvas=self.canvas, mode=1)
 
         self.button_frame = tk.Frame(self.map_frame)
         self.button_frame.pack(pady=(10, 10))
@@ -419,22 +419,23 @@ class App:
 
         # update trạng thái của agent trong map của program
         #self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.program_canvas)
-        self.program_canvas.pack(side='left', padx=(10, 5), pady=(5, 5))
         self.draw_elements(self.program_canvas, 0)
         self.draw_agent(self.agent.state, self.program_canvas)
-
+        
         self.score_label.config(text=f"Score: {self.program.get_score()}")
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
-        self.action_label.config(text=f"Action: {self.action()}")
-
+        
         for i in range(rows):
             print(self.program.map[i])
+
+        self.agent.run()
+        self.action_label.config(text=f"Action: {self.action()}")
         
         if self.program.run() == "Finished":
             # self.next_step_button.config(state="disabled")
             # self.auto_run_button.config(state="disabled")
             self.show_end_frame()
-        self.agent.run()
+        
 
     def auto_run(self):
         while True:

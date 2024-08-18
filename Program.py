@@ -50,7 +50,7 @@ class Program:
         for i, j in self.get_adjacent_cells(x, y):
             if self.map[i][j] == '-':
                 self.map[i][j] = 'W_H'
-            elif 'W' not in self.map[i][j]:
+            elif 'W_H' not in self.map[i][j]:
                 self.map[i][j] += ' W_H'
 
     def add_glow(self, x, y):
