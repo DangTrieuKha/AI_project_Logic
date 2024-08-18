@@ -176,7 +176,7 @@ class Agent:
         else:
             self.update_map_explored('0')
         
-        if 'G' in tmp:
+        if 'G' in tmp or 'H_P' in tmp:
             self.state.act('GRAB')
             return
         
@@ -265,14 +265,6 @@ class Agent:
             if 'G_L' in tmp:
                 # Implement logic to go around to grab the healing potion
                 return
-            
-            if 'H_P' in tmp:
-                self.state.act('GRAB')
-                return
-            
-            # Temporary logic to move forward
-            self.state.act('MOVE_FORWARD')
-            return
 
     def update_visited(self):
         self.visited.add(self.state.position)
