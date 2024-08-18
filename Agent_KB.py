@@ -89,6 +89,7 @@ class AgentKB:
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
         tu_list = percepts.split()
+        
         for tu in tu_list:
             if tu == 'B':
                 tmp = []
