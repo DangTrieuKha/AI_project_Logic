@@ -133,21 +133,44 @@ class Agent:
         tmp = self.get_env_info()
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
         # # #[DEBUG ONLY, COMMENT OR DELETE WHEN DONE]
-        # print((self.state.position[0], self.state.position[1]), 'have percept: ', tmp )
-        # if self.kb.is_there_stench(self.state.position[0],self.state.position[1]):
-        #     print((self.state.position[0],self.state.position[1]), 'have stench')
-        # else:
-        #     print((self.state.position[0],self.state.position[1]), 'do not have stench')
-        # dx = [0, 1, 0, -1]
-        # dy = [1, 0, -1, 0]
-        # for i in range(4):
-        #     x = self.state.position[0] + dx[i]
-        #     y = self.state.position[1] + dy[i]
-        #     if x >= 1 and x <=10 and y >= 1 and y<= 10:
-        #         if self.kb.is_there_stench(x,y):
-        #             print((x,y), 'have stench')
-        #         else:
-        #             print((x,y), 'do not have stench')
+        print((self.state.position[0], self.state.position[1]), 'have percept: ', tmp )
+        if self.kb.is_there_stench(self.state.position[0],self.state.position[1]):
+            print((self.state.position[0],self.state.position[1]), 'have stench')
+        else:
+            print((self.state.position[0],self.state.position[1]), 'do not have stench')
+        dx = [0, 1, 0, -1]
+        dy = [1, 0, -1, 0]
+        for i in range(4):
+            x = self.state.position[0] + dx[i]
+            y = self.state.position[1] + dy[i]
+            if x >= 1 and x <=10 and y >= 1 and y<= 10:
+                if self.kb.is_there_stench(x,y):
+                    print((x,y), 'have stench')
+                else:
+                    print((x,y), 'do not have stench')
+
+                if self.kb.is_there_wumpus(x,y):
+                    print((x,y), 'have wumpus')
+                else:
+                    print((x,y), 'do not have wumpus')
+
+                if self.kb.is_there_pit(x,y):
+                    print((x,y), 'have pit')
+                else:
+                    print((x,y), 'do not have pit')
+                
+                if self.kb.is_there_glow(x,y):
+                    print((x,y), 'have glow')
+                else:
+                    print((x,y), 'do not have glow')
+                
+                if self.kb.is_there_healing(x,y):
+                    print((x,y), 'have healing')
+                else:
+                    print((x,y), 'do not have healing')
+
+
+
         if 'P_G' in tmp:
             self.update_map_explored('-1')
         else:

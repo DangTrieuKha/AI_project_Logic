@@ -134,8 +134,7 @@ class App:
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
         list_agentKB = []
-        #list_agentKB.append((x, y))
-        self.update_grid(x, y, "white", canvas=canvas)
+        list_agentKB.append((x, y))
         for i in range(4):
             x1 = x + dx[i]
             y1 = y + dy[i]
@@ -151,30 +150,30 @@ class App:
             x1 = (x1 - 1) * self.cell_size
             y1 = (10 - y1) * self.cell_size
             self.update_grid(x_u, y_u, "white", canvas=canvas)
-            check = False
+
             if self.agent.kb.is_there_pit(x_u, y_u):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.pit_image, anchor=CENTER, tags="agentKB")
-                check = True
+
 
             if self.agent.kb.is_there_wumpus(x_u, y_u):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER, tags="agentKB")
-                check = True
+             
 
             if self.agent.kb.is_there_poison(x_u, y_u):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.poison_image, anchor=CENTER, tags="agentKB")
-                check = True
+                
 
             if self.agent.kb.is_there_healing(x_u, y_u):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER, tags="agentKB")
-                check = True
+                
 
             if self.agent.kb.is_there_glow(x_u, y_u):
                 canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="G_L", fill="blue", font="Arial 12", tags="agentKB")
-                check = True
+                
             
             if self.agent.kb.is_there_stench(x_u, y_u):
                 canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="S", fill="red", font="Arial 12", tags="agentKB")
-                check = True
+                
             
             # if check == False:
             #     if self.agent.kb.is_there_not_pit(x_u, y_u) and self.agent.kb.is_there_not_wumpus(x_u, y_u) and self.agent.kb.is_there_not_poison(x_u, y_u) and self.agent.kb.is_there_not_healing(x_u, y_u) and self.agent.kb.is_there_not_glow(x_u, y_u) and self.agent.kb.is_there_not_stench(x_u, y_u):
@@ -461,7 +460,6 @@ class App:
         if self.program.is_scream():
             thread = threading.Thread(target=self.play_sound)
             thread.start()
-                    
             
     def check_file_exists(self, filename):
         return os.path.isfile(filename)
