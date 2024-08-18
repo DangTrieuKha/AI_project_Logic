@@ -1,5 +1,5 @@
 from pysat.formula import CNF
-from pysat.solvers import Glucose3
+from pysat.solvers import Minisat22
 import itertools
 import copy
 
@@ -11,34 +11,18 @@ class AgentKB:
         # Thêm một mệnh đề vào CNF
         self.kb.append(clause)
 
-    def pl_resolve(self, ci, cj):
-        resolvents = []
-        for di in ci:
-            for dj in cj:
-                if di == -dj:
-                    resolvent = list(set(ci + cj) - {di, dj})
-                    if not resolvent:
-                        resolvents.append([])
-                    else:
-                        resolvents.append(resolvent)
-        return resolvents
-
     def ask(self, query):
         clauses = copy.deepcopy(self.kb.clauses)
         clauses.append([-literal for literal in query])  # Thêm phủ định của query
 
-        new = []
-        while True:
-            pairs = itertools.combinations(clauses, 2)
-            for (ci, cj) in pairs:
-                resolvents = self.pl_resolve(ci, cj)
-                if [] in resolvents:
-                    return True  # Mâu thuẫn, tức là có thể suy ra query
-                new.extend(resolvents)
-            new = list(filter(lambda x: x not in clauses, new))
-            if not new:
-                return False  # Không có mâu thuẫn, không thể suy ra query
-            clauses.extend(new)
+        solver = Minisat22()
+        solver.append_formula(clauses)
+
+        res = solver.solve()
+
+        solver.delete()
+
+        return not res
 
     def isValid(self,x,y):
         if x >= 1 and x <= 10 and y >= 1 and y <= 10:
@@ -335,11 +319,11 @@ class AgentKB:
 
 # print(f"Is there a wumpus at (3,3)? {agent_kb.is_there_wumpus(3, 3)}")
 
-agent_kb = AgentKB()
-agent_kb.tell('W', 2, 2)
-agent_kb.tell('S P P_G', 2, 1)
-agent_kb.tell('S', 1, 2)
-agent_kb.tell('S', 2, 3)
-agent_kb.tell('S', 3, 2)
-print(agent_kb.is_there_stench(2, 1))
-print(agent_kb.is_there_not_wumpus(2,2))
+# agent_kb = AgentKB()
+# agent_kb.tell('W', 2, 2)
+# agent_kb.tell('S P P_G', 2, 1)
+# agent_kb.tell('S', 1, 2)
+# agent_kb.tell('S', 2, 3)
+# agent_kb.tell('S', 3, 2)
+# print(agent_kb.is_there_stench(2, 1))
+# print(agent_kb.is_there_not_wumpus(2,2))
