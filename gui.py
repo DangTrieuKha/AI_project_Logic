@@ -353,10 +353,11 @@ class App:
         # self.draw_agentKB(self.agent.state, self.agentKB_canvas)
         self.draw_agent(self.agent.state, self.agentKB_canvas)
 
+        # action
         action = self.action()
         self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white", width=30, height=2)   
         self.action_label.pack()
-        self.score_label.config(text=f"Action: {action}")
+        self.action_label.config(text=f"Action: {action}")
 
         self.button_frame_step_2 = tk.Frame(self.map_agent_frame)
         self.button_frame_step_2.pack(pady=(10, 10))
