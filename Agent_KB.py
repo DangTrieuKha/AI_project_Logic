@@ -43,10 +43,10 @@ class AgentKB:
 
         for k in self.kb.clauses:
             if pos_clause in k:
-                if pos_clause in range(111, 211 + 1) or pos_clause in range(311, 411 + 1) or pos_clause in range(-411, -311 + 1) or pos_clause in range(-211, -111 + 1):
-                    new_clause = None
-                else:
-                    new_clause = [lit for lit in k if lit != pos_clause]
+                new_clause = [lit for lit in k if lit != pos_clause]
+                if len(new_clause) == 1:
+                    if pos_clause in range(111, 211 + 1) or pos_clause in range(311, 411 + 1) or pos_clause in range(-411, -311 + 1) or pos_clause in range(-211, -111 + 1):
+                        new_clause = None
                 if new_clause:
                     new_kb.append(new_clause)
             else:
