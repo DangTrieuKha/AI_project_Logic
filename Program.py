@@ -121,7 +121,13 @@ class Program:
                 adjacent = self.get_adjacent_cells(x_wumpus, y_wumpus)
                 for i_x, i_y in adjacent:
                     if 'S' in self.map[i_x][i_y]:
-                        self.map[i_x][i_y] = self.map[i_x][i_y].replace('S', '',1)
+                        adjacent_stench = self.get_adjacent_cells(i_x,i_y)
+                        check_not_wumpus = True
+                        for cell_x,cell_y in adjacent_stench:
+                            if 'W' in self.map[cell_x][cell_y]:
+                                check_not_wumpus = False
+                        if check_not_wumpus:
+                            self.map[i_x][i_y] = self.map[i_x][i_y].replace('S', '',1)
     
     def is_scream(self):
         return self.scream
