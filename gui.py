@@ -24,7 +24,7 @@ class App:
             print(f"Không thể tải âm thanh: {e}")
             return
 
-        self.agentKB = AgentKB()
+    
         self.default_input_text = "Enter relative path of file..."
         self.default_text = None
         
@@ -135,6 +135,7 @@ class App:
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
         list_agentKB = []
+        list_agentKB.append((x, y))
         for i in range(4):
             x1 = x + dx[i]
             y1 = y + dy[i]
@@ -199,6 +200,7 @@ class App:
             self.default_text = filename
             self.program = Program(self.default_text)
             self.agent = Agent(self.program.get_env_info, self.program.is_scream)
+            self.agentKB = self.agent.kb
             self.show_main_frame()
         else:
             messagebox.showerror("Error", "File not found. Please enter a valid file path.")
