@@ -8,57 +8,55 @@ class Program:
         self.agent_score = 0
         self.scream = False # is there scream at current cell of agent
     
-    def load_map(self, map_file) -> list[list[str]]:
+    def load_map(self, map_file) -> list[list[list[str]]]:
         with open(map_file, 'r') as file:
             lines = file.readlines()
-            n = int(lines[0])
+            # n = int(lines[0])
             grid = []
             for line in lines[1:]:
-                grid.append(line.strip().split('.'))
+                grid.append([cell.split(' ') for cell in line.strip().split('.')])
         return grid
 
     def update_percepts(self):
         # Update the map with percepts like Breeze, Stench, etc.
         for i in range(len(self.map)):
             for j in range(len(self.map[i])):
-                tu_list = self.map[i][j].split()
-                for tu in tu_list:
-                    if tu == 'W':
-                        self.add_stench(i, j)
-                    if tu == 'P':
-                        self.add_breeze(i, j)
-                    if tu == 'P_G':
-                        self.add_whiff(i, j)
-                    if tu == 'H_P':
-                        self.add_glow(i, j)
+                if 'W' in self.map[i][j]:
+                    self.add_stench(i, j)
+                if  'P' in self.map[i][j]:
+                    self.add_breeze(i, j)
+                if 'P_G' in self.map[i][j]:
+                    self.add_whiff(i, j)
+                if 'H_P' in self.map[i][j]:
+                    self.add_glow(i, j)
 
     def add_stench(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
-            if self.map[i][j] == '-':
-                self.map[i][j] = 'S'
+            if '-' in self.map[i][j]:
+                self.map[i][j][0] = 'S'
             elif 'S' not in self.map[i][j]:
-                self.map[i][j] += ' S'
+                self.map[i][j].append('S')
 
     def add_breeze(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
-            if self.map[i][j] == '-':
-                self.map[i][j] = 'B'
+            if '-' in self.map[i][j]:
+                self.map[i][j][0] = 'B'
             elif 'B' not in self.map[i][j]:
-                self.map[i][j] += ' B'
+                self.map[i][j].append('B')
 
     def add_whiff(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
-            if self.map[i][j] == '-':
-                self.map[i][j] = 'W_H'
-            elif 'W' not in self.map[i][j]:
-                self.map[i][j] += ' W_H'
+            if '-' in self.map[i][j]:
+                self.map[i][j][0] = 'W_H'
+            elif 'W_H' not in self.map[i][j]:
+                self.map[i][j].append('W_H')
 
     def add_glow(self, x, y):
         for i, j in self.get_adjacent_cells(x, y):
-            if self.map[i][j] == '-':
-                self.map[i][j] = 'G_L'
+            if '-' in self.map[i][j]:
+                self.map[i][j][0] = 'G_L'
             elif 'G_L' not in self.map[i][j]:
-                self.map[i][j] += ' G_L'
+                self.map[i][j].append('G_L')
 
     def get_adjacent_cells(self, x, y) -> list[tuple[int, int]]:
         adjacent = []
@@ -87,19 +85,24 @@ class Program:
         if self.agent_state.actions['GRAB']:
             adjacent = self.get_adjacent_cells(x_map,y_map)
             if 'H_P' in self.map[x_map][y_map]:
-                self.map[x_map][y_map] = self.map[x_map][y_map].replace('H_P', '', 1)
+                self.map[x_map][y_map].remove('H_P')
+                if self.map[x_map][y_map] == []:
+                    self.map[x_map][y_map] = ['-']
                 
                 if 'H_P' in self.map[x_map][y_map]:
                     return
                 
-                for i, j in adjacent:
-                    if 'G_L' in self.map[x_map][y_map]:
-                        self.map[x_map][y_map] = self.map[x_map][y_map].replace('G_L', '', 1)
+                for i_x, i_y in adjacent:
+                    if 'G_L' in self.map[i_x][i_y]:
+                        self.map[i_x][i_y].remove('G_L')
+
                 return
             
             if 'G' in self.map[x_map][y_map]:
-                self.map[x_map][y_map] = self.map[x_map][y_map].replace('G', '', 1)
-                return
+                self.map[x_map][y_map].remove('G')
+                if self.map[x_map][y_map] == []:
+                    self.map[x_map][y_map] = ['-']
+    
         elif self.agent_state.actions['SHOOT']:
             if direction == 'UP':
                 x_wumpus = x_map - 1
@@ -117,17 +120,24 @@ class Program:
             if x_wumpus >= 0 and x_wumpus <= 9 and y_wumpus >=0 and y_wumpus <= 9:
                 if 'W' in self.map[x_wumpus][y_wumpus]:
                     self.scream = True
-                    self.map[x_wumpus][y_wumpus] = self.map[x_wumpus][y_wumpus].replace('W', '', 1)
-                adjacent = self.get_adjacent_cells(x_wumpus, y_wumpus)
-                for i_x, i_y in adjacent:
-                    if 'S' in self.map[i_x][i_y]:
-                        adjacent_stench = self.get_adjacent_cells(i_x,i_y)
-                        check_not_wumpus = True
-                        for cell_x,cell_y in adjacent_stench:
-                            if 'W' in self.map[cell_x][cell_y]:
-                                check_not_wumpus = False
-                        if check_not_wumpus:
-                            self.map[i_x][i_y] = self.map[i_x][i_y].replace('S', '',1)
+                    self.map[x_wumpus][y_wumpus].remove('W')
+                    adjacent = self.get_adjacent_cells(x_wumpus, y_wumpus)
+                    for i_x, i_y in adjacent:
+                        if 'S' in self.map[i_x][i_y]:
+                            adjacent_stench = self.get_adjacent_cells(i_x,i_y)
+                            check_not_wumpus = True
+                            for cell_x,cell_y in adjacent_stench:
+                                if 'W' in self.map[cell_x][cell_y]:
+                                    check_not_wumpus = False
+                            if check_not_wumpus:
+                                self.map[i_x][i_y].remove('S')
+
+                        if self.map[i_x][i_y] == []:
+                            self.map[i_x][i_y] = ['-']
+
+                    if self.map[x_wumpus][y_wumpus] == []:
+                        self.map[x_wumpus][y_wumpus] = ['-']
+
     
     def is_scream(self):
         return self.scream
@@ -155,14 +165,12 @@ class Program:
             self.update_score(-100)
             self.update_map()
             self.agent_state.actions['SHOOT'] = False
-            #self.update_percepts()
         elif actions['GRAB']:
             self.update_score(-10)
-            if self.map[10 - self.agent_state.get_position()[1]][self.agent_state.get_position()[0] - 1] == 'G':
+            if 'G' in self.map[10 - self.agent_state.get_position()[1]][self.agent_state.get_position()[0] - 1]:
                 self.update_score(5000)
             self.update_map()
             self.agent_state.actions['GRAB'] = False
-            #self.update_percepts()
         elif actions['TURN_LEFT']:
             self.update_score(-10)
             self.agent_state.actions['TURN_LEFT'] = False
@@ -171,16 +179,11 @@ class Program:
             self.agent_state.actions['TURN_RIGHT'] = False
 
         x, y = self.agent_state.get_position()
-        print(self.map[10 - y][x - 1])
+        # print(self.map[10 - y][x - 1])
 
-        if 'W' in self.map[10 - y][x - 1]:
+        if 'W' in self.map[10 - y][x - 1] or 'P' in self.map[10 - y][x - 1]:
             self.update_score(-10000)
             return self.end_game()
-        
-        for i in range(len(self.map[10 - y][x - 1])):
-            if self.map[10 - y][x - 1][i] == 'P' and self.map[10 - y][x - 1][i + 1] != '_':
-                self.update_score(-10000)
-                return self.end_game()
         
         if 'P_G' in self.map[10 - y][x - 1]:
             self.agent_state.poison()

@@ -1,5 +1,5 @@
 from pysat.formula import CNF
-from pysat.solvers import Glucose3
+from pysat.solvers import Minisat22
 import itertools
 import copy
 
@@ -9,51 +9,44 @@ class AgentKB:
 
     def add_clause(self, clause):
         # Thêm một mệnh đề vào CNF
+        # for child_clause in clause:
+        #     self.add_single_clause(child_clause)
         self.kb.append(clause)
-
-    def pl_resolve(self, ci, cj):
-        resolvents = []
-        for di in ci:
-            for dj in cj:
-                if di == -dj:
-                    resolvent = list(set(ci + cj) - {di, dj})
-                    if not resolvent:
-                        resolvents.append([])
-                    else:
-                        resolvents.append(resolvent)
-        return resolvents
 
     def ask(self, query):
         clauses = copy.deepcopy(self.kb.clauses)
         clauses.append([-literal for literal in query])  # Thêm phủ định của query
 
-        new = []
-        while True:
-            pairs = itertools.combinations(clauses, 2)
-            for (ci, cj) in pairs:
-                resolvents = self.pl_resolve(ci, cj)
-                if [] in resolvents:
-                    return True  # Mâu thuẫn, tức là có thể suy ra query
-                new.extend(resolvents)
-            new = list(filter(lambda x: x not in clauses, new))
-            if not new:
-                return False  # Không có mâu thuẫn, không thể suy ra query
-            clauses.extend(new)
+        solver = Minisat22()
+        solver.append_formula(clauses)
+
+        res = solver.solve()
+
+        solver.delete()
+
+        return not res
 
     def isValid(self,x,y):
-        if x >= 1 and x <= 10 and y>=1 and y <= 10:
+        if x >= 1 and x <= 10 and y >= 1 and y <= 10:
             return True
         return False
     
     #This function use to add a single clause to KB. 
-    #when add a single clause to KB can lead to conflict so create this function. parameter clause has form as: self.neg_literrial_...(x,y)
+    #when add a single clause to KB can lead to conflict so create this function. parameter clause has form as: self.neg/pos_literrial_...(x,y)
     def add_single_clause(self, clause):
         new_kb = CNF()
         pos_clause = -clause
 
+        # if 411 <= clause <= 810:
+        #     self.kb.append([clause])
+        #     return
+
         for k in self.kb.clauses:
             if pos_clause in k:
-                new_clause = [lit for lit in k if lit != pos_clause]
+                if pos_clause in range(111, 211 + 1) or pos_clause in range(311, 411 + 1) or pos_clause in range(-411, -311 + 1) or pos_clause in range(-211, -111 + 1):
+                    new_clause = None
+                else:
+                    new_clause = [lit for lit in k if lit != pos_clause]
                 if new_clause:
                     new_kb.append(new_clause)
             else:
@@ -88,133 +81,110 @@ class AgentKB:
     def tell(self, percepts, x,y):
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
-        tu_list = percepts.split()
+        if 'B' in percepts:
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    tmp.append(self.pos_literal_pit(x_new, y_new))
+            self.add_clause(tmp)
+        else:
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.add_single_clause(self.neg_literal_pit(x_new,y_new))
+    
+        if 'S' in percepts:
+            # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    #add (S and R_S) -> W
+                    tmp.append(self.pos_literal_wumpus(x_new, y_new))
+                    
+            self.add_clause(tmp)
+            #add S
+            self.add_single_clause(self.pos_literal_stench(x,y))
+            # add R_S
+            self.add_single_clause(self.pos_literal_reliable_stench(x,y))
+        else:
+            #add not wumpus
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    # add not W
+                    self.add_single_clause(self.neg_literal_wumpus(x_new,y_new))
+            # add not S
+            self.add_single_clause(self.neg_literal_stench(x,y))
+            # add R_S
+            self.add_single_clause(self.pos_literal_reliable_stench(x,y))
+
+        if 'W_H' in percepts:
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    tmp.append(self.pos_literal_poison(x_new, y_new))
+            self.add_clause(tmp)
+        else:
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.add_single_clause(self.neg_literal_poison(x_new,y_new))
+                
+                
+        if 'G_L' in percepts:
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    # add (G and R_G) -> H, add G, add R_G
+                    tmp.append(self.pos_literal_healing(x_new, y_new))
+                    
+            self.add_clause(tmp)
+            #add G
+            self.add_single_clause(self.pos_literal_glow(x,y))
+            # add R_G
+            self.add_single_clause(self.pos_literal_reliable_glow(x,y))
+        else:
+            #add not G
+            self.add_single_clause(self.neg_literal_glow(x,y))
+            # add R_G
+            self.add_single_clause(self.pos_literal_reliable_glow(x,y))
+            # add not H
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.add_single_clause(self.neg_literal_healing(x_new, y_new))
+
+        if 'P' in percepts:
+            self.add_clause([self.pos_literal_pit(x,y)])
+        else:
+            self.add_single_clause(self.neg_literal_pit(x,y))
+        if 'W' in percepts:
+            self.add_clause([self.pos_literal_wumpus(x,y)])
+        else:
+            self.add_single_clause(self.neg_literal_wumpus(x,y))
         
-        for tu in tu_list:
-            if tu == 'B':
-                tmp = []
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        tmp.append(self.pos_literal_pit(x_new, y_new))
-                self.add_clause(tmp)
-            else:
-                tmp = []
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        self.add_single_clause(self.neg_literal_pit(x_new,y_new))
-
-                    
-                    
-            if tu == 'S':
-                # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
-                tmp = []
-                tmp.append(self.neg_literal_stench(x,y))
-                tmp.append(self.neg_literal_reliable_stench(x,y))
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        #add (S and R_S) -> W
-                        tmp.append(self.pos_literal_wumpus(x_new, y_new))
-                        
-                self.add_clause(tmp)
-                #add S
-                self.add_single_clause(self.pos_literal_stench(x,y))
-                # add R_S
-                self.add_single_clause(self.pos_literal_reliable_stench(x,y))
-
-            else:
-                # add not S
-                self.add_single_clause(self.neg_literal_stench(x,y))
-                # add R_S
-                self.add_single_clause(self.pos_literal_reliable_stench(x,y))
-                #add not wumpus
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        # add not W
-                        self.add_single_clause(self.neg_literal_wumpus(x_new,y_new))
-                
-                    
-                    
-            if tu == 'W_H':
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        tmp.append(self.pos_literal_poison(x_new, y_new))
-                self.add_clause(tmp)
-            else:
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        self.add_single_clause(self.neg_literal_poison(x_new,y_new))
-                    
-                    
-            if tu == 'G_L':
-                tmp = []
-                tmp.append(self.neg_literal_glow(x,y))
-                tmp.append( self.neg_literal_reliable_glow(x,y))
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        # add (G and R_G) -> H, add G, add R_G
-                        tmp.append(self.pos_literal_healing(x_new, y_new))
-                        
-                self.add_clause(tmp)
-                #add G
-                self.add_single_clause(self.pos_literal_glow(x,y))
-                # add R_G
-                self.add_single_clause(self.pos_literal_reliable_glow(x,y))
-            else:
-                #add not G
-                self.add_single_clause(self.neg_literal_glow(x,y))
-                # add R_G
-                self.add_single_clause(self.pos_literal_reliable_glow(x,y))
-                # add not H
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        self.add_single_clause(self.neg_literal_healing(x_new, y_new))
-                        
-
-                    
-                    
-            if tu == 'P':
-                self.add_clause([self.pos_literal_pit(x,y)])
-            else:
-                self.add_single_clause(self.neg_literal_pit(x,y))
-
-            if tu == 'W':
-                self.add_clause([self.pos_literal_wumpus(x,y)])
-            else:
-                self.add_single_clause(self.neg_literal_wumpus(x,y))
-                    
-                    
-                    
-                
-                
-            if  tu == 'P_G':
-                self.add_clause([self.pos_literal_poison(x,y)])
-            else:
-                self.add_single_clause(self.neg_literal_poison(x,y))
+        if  'P_G' in percepts:
+            self.add_clause([self.pos_literal_poison(x,y)])
+        else:
+            self.add_single_clause(self.neg_literal_poison(x,y))
+    
         
-                    
-            if tu == 'H_P':
-                self.add_clause([self.pos_literal_healing(x,y)])
-            else:
-                self.add_single_clause(self.neg_literal_healing(x,y))
-
-                
-
+        if 'H_P' in percepts:
+            self.add_clause([self.pos_literal_healing(x,y)])
+        else:
+            self.add_single_clause(self.neg_literal_healing(x,y))
 
     # Khẳng định
     def pos_literal_pit(self, x, y):
@@ -349,11 +319,11 @@ class AgentKB:
 
 # print(f"Is there a wumpus at (3,3)? {agent_kb.is_there_wumpus(3, 3)}")
 
-agent_kb = AgentKB()
-agent_kb.tell('W', 2, 2)
-agent_kb.tell('S P P_G', 2, 1)
-agent_kb.tell('S', 1, 2)
-agent_kb.tell('S', 2, 3)
-agent_kb.tell('S', 3, 2)
-print(agent_kb.is_there_stench(2, 1))
-print(agent_kb.is_there_not_wumpus(2,2))
+# agent_kb = AgentKB()
+# agent_kb.tell('W', 2, 2)
+# agent_kb.tell('S P P_G', 2, 1)
+# agent_kb.tell('S', 1, 2)
+# agent_kb.tell('S', 2, 3)
+# agent_kb.tell('S', 3, 2)
+# print(agent_kb.is_there_stench(2, 1))
+# print(agent_kb.is_there_not_wumpus(2,2))
