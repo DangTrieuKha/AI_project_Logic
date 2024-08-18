@@ -357,6 +357,7 @@ class App:
 
     def next_step(self):
         self.agent.run() 
+        self.sound_scream()
         x, y = self.agent.state.get_position()
         #self.path.append((x, y))
         rows = len(self.program.map)
@@ -406,7 +407,7 @@ class App:
         self.sound.play()
 
     def sound_scream(self):
-        if self.program.is_cream():
+        if self.program.is_scream():
             thread = threading.Thread(target=self.play_sound)
             thread.start()
     
