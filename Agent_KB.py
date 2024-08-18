@@ -9,6 +9,8 @@ class AgentKB:
 
     def add_clause(self, clause):
         # Thêm một mệnh đề vào CNF
+        # for child_clause in clause:
+        #     self.add_single_clause(child_clause)
         self.kb.append(clause)
 
     def ask(self, query):
@@ -30,14 +32,21 @@ class AgentKB:
         return False
     
     #This function use to add a single clause to KB. 
-    #when add a single clause to KB can lead to conflict so create this function. parameter clause has form as: self.neg_literrial_...(x,y)
+    #when add a single clause to KB can lead to conflict so create this function. parameter clause has form as: self.neg/pos_literrial_...(x,y)
     def add_single_clause(self, clause):
         new_kb = CNF()
         pos_clause = -clause
 
+        # if 411 <= clause <= 810:
+        #     self.kb.append([clause])
+        #     return
+
         for k in self.kb.clauses:
             if pos_clause in k:
-                new_clause = [lit for lit in k if lit != pos_clause]
+                if pos_clause in range(111, 211 + 1) or pos_clause in range(311, 411 + 1) or pos_clause in range(-411, -311 + 1) or pos_clause in range(-211, -111 + 1):
+                    new_clause = None
+                else:
+                    new_clause = [lit for lit in k if lit != pos_clause]
                 if new_clause:
                     new_kb.append(new_clause)
             else:
@@ -81,19 +90,15 @@ class AgentKB:
                     tmp.append(self.pos_literal_pit(x_new, y_new))
             self.add_clause(tmp)
         else:
-            
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
                     self.add_single_clause(self.neg_literal_pit(x_new,y_new))
-                
-                
+    
         if 'S' in percepts:
             # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
             tmp = []
-            tmp.append(self.neg_literal_stench(x,y))
-            tmp.append(self.neg_literal_reliable_stench(x,y))
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
@@ -107,10 +112,6 @@ class AgentKB:
             # add R_S
             self.add_single_clause(self.pos_literal_reliable_stench(x,y))
         else:
-            # add not S
-            self.add_single_clause(self.neg_literal_stench(x,y))
-            # add R_S
-            self.add_single_clause(self.pos_literal_reliable_stench(x,y))
             #add not wumpus
             for k in range(4):
                 x_new = x + dx[k]
@@ -118,9 +119,11 @@ class AgentKB:
                 if self.isValid(x_new,y_new):
                     # add not W
                     self.add_single_clause(self.neg_literal_wumpus(x_new,y_new))
-            
-                
-                
+            # add not S
+            self.add_single_clause(self.neg_literal_stench(x,y))
+            # add R_S
+            self.add_single_clause(self.pos_literal_reliable_stench(x,y))
+
         if 'W_H' in percepts:
             for k in range(4):
                 x_new = x + dx[k]
@@ -138,8 +141,6 @@ class AgentKB:
                 
         if 'G_L' in percepts:
             tmp = []
-            tmp.append(self.neg_literal_glow(x,y))
-            tmp.append( self.neg_literal_reliable_glow(x,y))
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
@@ -163,9 +164,7 @@ class AgentKB:
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
                     self.add_single_clause(self.neg_literal_healing(x_new, y_new))
-                    
-                
-                
+
         if 'P' in percepts:
             self.add_clause([self.pos_literal_pit(x,y)])
         else:

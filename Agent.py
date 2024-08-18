@@ -116,24 +116,10 @@ class Agent:
         self.pending_actions.append('CLIMB')
         self.run()
 
-    def move(self):
-        if self.state.agent_health == 25:
-            self.state.act('HEAL')
-            return
-        
-        if self.is_scream():
-            self.state.act('SHOOT')
-            self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
-            return
-
-        if self.pending_actions != []:
-            self.state.act(self.pending_actions.pop(0))
-            return
-
-        tmp = self.get_env_info()
-        self.kb.tell(tmp, self.state.position[0], self.state.position[1])
+    def debug(self, tmp):
         # # #[DEBUG ONLY, COMMENT OR DELETE WHEN DONE]
-        print((self.state.position[0], self.state.position[1]), 'have percept: ', tmp )
+        # print(self.kb.kb.clauses)
+        print((self.state.position[0], self.state.position[1]), 'have percept: ', tmp)
         if self.kb.is_there_stench(self.state.position[0],self.state.position[1]):
             print((self.state.position[0],self.state.position[1]), 'have stench')
         else:
@@ -169,7 +155,23 @@ class Agent:
                 else:
                     print((x,y), 'do not have healing')
 
+    def move(self):
+        if self.state.agent_health == 25:
+            self.state.act('HEAL')
+            return
+        
+        if self.is_scream():
+            self.state.act('SHOOT')
+            self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+            # self.debug(self.get_env_info())
+            return
 
+        if self.pending_actions != []:
+            self.state.act(self.pending_actions.pop(0))
+            return
+
+        tmp = self.get_env_info()
+        self.kb.tell(tmp, self.state.position[0], self.state.position[1])
 
         if 'P_G' in tmp:
             self.update_map_explored('-1')
