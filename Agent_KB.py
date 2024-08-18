@@ -89,6 +89,17 @@ class AgentKB:
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
         tu_list = percepts.split()
+
+        check_not_B = True
+        check_not_S = True
+        check_not_WH = True
+        check_not_GL = True
+        check_not_P = True
+        check_not_W = True
+        
+        check_not_PG = True
+        check_not_HP = True
+
         for tu in tu_list:
             if tu == 'B':
                 tmp = []
@@ -98,13 +109,8 @@ class AgentKB:
                     if self.isValid(x_new,y_new):
                         tmp.append(self.pos_literal_pit(x_new, y_new))
                 self.add_clause(tmp)
-            else:
-                tmp = []
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        self.add_single_clause(self.neg_literal_pit(x_new,y_new))
+                check_not_B = False
+            
 
                     
                     
@@ -125,19 +131,10 @@ class AgentKB:
                 self.add_single_clause(self.pos_literal_stench(x,y))
                 # add R_S
                 self.add_single_clause(self.pos_literal_reliable_stench(x,y))
+                check_not_S = False
 
-            else:
-                # add not S
-                self.add_single_clause(self.neg_literal_stench(x,y))
-                # add R_S
-                self.add_single_clause(self.pos_literal_reliable_stench(x,y))
-                #add not wumpus
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        # add not W
-                        self.add_single_clause(self.neg_literal_wumpus(x_new,y_new))
+            
+                
                 
                     
                     
@@ -148,12 +145,9 @@ class AgentKB:
                     if self.isValid(x_new,y_new):
                         tmp.append(self.pos_literal_poison(x_new, y_new))
                 self.add_clause(tmp)
-            else:
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        self.add_single_clause(self.neg_literal_poison(x_new,y_new))
+                check_not_WH = False
+            
+                
                     
                     
             if tu == 'G_L':
@@ -172,30 +166,24 @@ class AgentKB:
                 self.add_single_clause(self.pos_literal_glow(x,y))
                 # add R_G
                 self.add_single_clause(self.pos_literal_reliable_glow(x,y))
-            else:
-                #add not G
-                self.add_single_clause(self.neg_literal_glow(x,y))
-                # add R_G
-                self.add_single_clause(self.pos_literal_reliable_glow(x,y))
-                # add not H
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        self.add_single_clause(self.neg_literal_healing(x_new, y_new))
+                check_not_GL = False
+            
+                
                         
 
                     
                     
             if tu == 'P':
                 self.add_clause([self.pos_literal_pit(x,y)])
-            else:
-                self.add_single_clause(self.neg_literal_pit(x,y))
+                check_not_P = False
+            
+                
 
             if tu == 'W':
                 self.add_clause([self.pos_literal_wumpus(x,y)])
-            else:
-                self.add_single_clause(self.neg_literal_wumpus(x,y))
+                check_not_W = False
+            
+                
                     
                     
                     
@@ -203,14 +191,62 @@ class AgentKB:
                 
             if  tu == 'P_G':
                 self.add_clause([self.pos_literal_poison(x,y)])
-            else:
-                self.add_single_clause(self.neg_literal_poison(x,y))
+                check_not_PG = False
+            
+                
         
                     
             if tu == 'H_P':
                 self.add_clause([self.pos_literal_healing(x,y)])
-            else:
-                self.add_single_clause(self.neg_literal_healing(x,y))
+                check_not_HP = False
+            
+                
+        
+        if check_not_B:
+            
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.add_single_clause(self.neg_literal_pit(x_new,y_new))
+        if check_not_S:
+            # add not S
+                self.add_single_clause(self.neg_literal_stench(x,y))
+                # add R_S
+                self.add_single_clause(self.pos_literal_reliable_stench(x,y))
+                #add not wumpus
+                for k in range(4):
+                    x_new = x + dx[k]
+                    y_new = y + dy[k]
+                    if self.isValid(x_new,y_new):
+                        # add not W
+                        self.add_single_clause(self.neg_literal_wumpus(x_new,y_new))
+        if check_not_WH:
+            for k in range(4):
+                    x_new = x + dx[k]
+                    y_new = y + dy[k]
+                    if self.isValid(x_new,y_new):
+                        self.add_single_clause(self.neg_literal_poison(x_new,y_new))
+        if check_not_GL:
+            #add not G
+            self.add_single_clause(self.neg_literal_glow(x,y))
+                # add R_G
+            self.add_single_clause(self.pos_literal_reliable_glow(x,y))
+                # add not H
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.add_single_clause(self.neg_literal_healing(x_new, y_new))
+        if check_not_P:
+            self.add_single_clause(self.neg_literal_pit(x,y))
+        if check_not_W:
+            self.add_single_clause(self.neg_literal_wumpus(x,y))
+        if check_not_PG:
+            self.add_single_clause(self.neg_literal_poison(x,y))
+        if check_not_HP:
+            self.add_single_clause(self.neg_literal_healing(x,y))
 
                 
 

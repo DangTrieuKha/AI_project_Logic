@@ -104,11 +104,11 @@ class App:
             if tu_list[i] == 'W_H':
                 canvas.create_text(x_s , y_s - self.cell_size // 4, text="W_H", fill="red", font="Arial 12", tags="element")
 
-    def draw_elements(self, canvas):
+    def draw_elements(self, canvas, mode):
         canvas.delete("element")
         for i, row in enumerate(self.program.map):
             for j, cell in enumerate(row):
-                self.draw_element_i(i, j, cell, 1, canvas=canvas)
+                self.draw_element_i(i, j, cell, mode, canvas=canvas)
         
     
     def draw_agent(self, state, canvas):
@@ -131,7 +131,7 @@ class App:
         canvas.delete("agentKB")
         x, y = state.get_position()
         # DEBUG
-        print(f'({x}, {y}): {self.agent.kb.is_there_stench(x, y)}')
+        #print(f'({x}, {y}): {self.agent.kb.is_there_stench(x, y)}')
 
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
@@ -151,37 +151,41 @@ class App:
             x_u, y_u = copy.deepcopy(x1), copy.deepcopy(y1)
             x1 = (x1 - 1) * self.cell_size
             y1 = (10 - y1) * self.cell_size
+            self.update_grid(x_u, y_u, "white", canvas=canvas)
             check = False
-            if self.agent.kb.is_there_pit(x1, y1):
+            if self.agent.kb.is_there_pit(x_u, y_u):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.pit_image, anchor=CENTER, tags="agentKB")
                 check = True
 
-            if self.agent.kb.is_there_wumpus(x1, y1):
+            if self.agent.kb.is_there_wumpus(x_u, y_u):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER, tags="agentKB")
                 check = True
 
-            if self.agent.kb.is_there_poison(x1, y1):
+            if self.agent.kb.is_there_poison(x_u, y_u):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.poison_image, anchor=CENTER, tags="agentKB")
                 check = True
 
-            if self.agent.kb.is_there_healing(x1, y1):
+            if self.agent.kb.is_there_healing(x_u, y_u):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER, tags="agentKB")
                 check = True
 
-            if self.agent.kb.is_there_glow(x1, y1):
+            if self.agent.kb.is_there_glow(x_u, y_u):
                 canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="G_L", fill="blue", font="Arial 12", tags="agentKB")
                 check = True
             
-            if self.agent.kb.is_there_stench(x1, y1):
+            if self.agent.kb.is_there_stench(x_u, y_u):
                 canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="S", fill="red", font="Arial 12", tags="agentKB")
                 check = True
             
-            if self.agent.kb.is_there_not_pit(x1, y1) and self.agent.kb.is_there_not_wumpus(x1, y1) and self.agent.kb.is_there_not_poison(x1, y1) and self.agent.kb.is_there_not_healing(x1, y1) and self.agent.kb.is_there_not_glow(x1, y1) and self.agent.kb.is_there_not_stench and check == False:
-                self.update_grid(x_u, y_u, "blue", canvas=canvas)
-            else:
-                self.update_grid(x_u, y_u, "white", canvas=canvas)
-        x_m, y_m = 10 - y, x - 1
-        self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.agentKB_canvas)
+            # if check == False:
+            #     if self.agent.kb.is_there_not_pit(x_u, y_u) and self.agent.kb.is_there_not_wumpus(x_u, y_u) and self.agent.kb.is_there_not_poison(x_u, y_u) and self.agent.kb.is_there_not_healing(x_u, y_u) and self.agent.kb.is_there_not_glow(x_u, y_u) and self.agent.kb.is_there_not_stench(x_u, y_u):
+            #         self.update_grid(x_u, y_u, "blue", canvas=canvas)
+            #     else:
+            #         if not self.agent.kb.is_there_not_pit(x_u, y_u) and not self.agent.kb.is_there_not_wumpus(x_u, y_u) and not self.agent.kb.is_there_not_poison(x_u, y_u) and not self.agent.kb.is_there_not_healing(x_u, y_u) and not self.agent.kb.is_there_not_glow(x_u, y_u) and not self.agent.kb.is_there_not_stench(x_u, y_u):
+            #             self.update_grid(x_u, y_u, "white", canvas=canvas)
+            #print(x_u, y_u, check)
+        #x_m, y_m = 10 - y, x - 1
+        #self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.agentKB_canvas)
             
 
     def on_entry_click(self, event):
@@ -328,7 +332,7 @@ class App:
         self.program_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
         self.program_canvas.pack(side='left', padx=(10, 5), pady=(5, 5))
         self.draw_grid(self.program_canvas)
-        self.draw_elements(self.program_canvas)
+        self.draw_elements(self.program_canvas, 1)
         # màu = "white" thay vì "green"
         self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "white", self.program_canvas)
         self.draw_agent(self.agent.state, self.program_canvas)
@@ -339,12 +343,15 @@ class App:
         self.draw_grid(self.agentKB_canvas)
         # màu = "white" thay vì "green"
         self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "white", self.agentKB_canvas)
-        self.draw_agent(self.agent.state, self.agentKB_canvas)
+        
         x, y = self.agent.state.get_position()
         self.path.append((x, y))
         self.agentKB_list.append((x, y))
         self.agentKB_list.append((x, y + 1))
         self.agentKB_list.append((x + 1, y))
+
+        # self.draw_agentKB(self.agent.state, self.agentKB_canvas)
+        self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         action = self.action()
         self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white")
@@ -390,7 +397,6 @@ class App:
         self.back_welcome_frame.pack(pady=(10, 10))
 
     def next_step(self):
-        self.agent.run() 
         self.sound_scream()
         x, y = self.agent.state.get_position()
         #self.path.append((x, y))
@@ -412,23 +418,30 @@ class App:
         self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         # update trạng thái của agent trong map của program
-        self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.program_canvas)
+        #self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.program_canvas)
+        self.program_canvas.pack(side='left', padx=(10, 5), pady=(5, 5))
+        self.draw_elements(self.program_canvas, 0)
         self.draw_agent(self.agent.state, self.program_canvas)
 
         self.score_label.config(text=f"Score: {self.program.get_score()}")
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
         self.action_label.config(text=f"Action: {self.action()}")
+
+        for i in range(rows):
+            print(self.program.map[i])
+        
         if self.program.run() == "Finished":
             # self.next_step_button.config(state="disabled")
             # self.auto_run_button.config(state="disabled")
             self.show_end_frame()
+        self.agent.run()
 
     def auto_run(self):
         while True:
             # self.auto_run_button.config(state="disabled")
             self.next_step()
             self.root.update()
-            self.root.after(500)
+            self.root.after(100)
             if self.program.run() == "Finished":
                 break
 
@@ -446,7 +459,6 @@ class App:
         if self.program.is_scream():
             thread = threading.Thread(target=self.play_sound)
             thread.start()
-    
     def check_file_exists(self, filename):
         return os.path.isfile(filename)
     

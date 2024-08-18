@@ -119,7 +119,7 @@ class Agent:
 
         tmp = self.get_env_info()
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
-        # #[DEBUG ONLY, COMMENT OR DELETE WHEN DONE]
+        # # #[DEBUG ONLY, COMMENT OR DELETE WHEN DONE]
         # print((self.state.position[0], self.state.position[1]), 'have percept: ', tmp )
         # if self.kb.is_there_stench(self.state.position[0],self.state.position[1]):
         #     print((self.state.position[0],self.state.position[1]), 'have stench')
