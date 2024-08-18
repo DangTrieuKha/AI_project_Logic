@@ -81,7 +81,7 @@ class AgentKB:
                     tmp.append(self.pos_literal_pit(x_new, y_new))
             self.add_clause(tmp)
         else:
-            tmp = []
+            
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
