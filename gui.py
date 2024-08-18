@@ -130,8 +130,9 @@ class App:
     def draw_agentKB(self, state, canvas):
         canvas.delete("agentKB")
         x, y = state.get_position()
-        
-            #print((x,y), 'do not have stench')
+        # DEBUG
+        print(f'({x}, {y}): {self.agent.kb.is_there_stench(x, y)}')
+
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
         list_agentKB = []
@@ -151,33 +152,31 @@ class App:
             x1 = (x1 - 1) * self.cell_size
             y1 = (10 - y1) * self.cell_size
             check = False
-            if self.agentKB.is_there_pit(x1, y1):
+            if self.agent.kb.is_there_pit(x1, y1):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.pit_image, anchor=CENTER, tags="agentKB")
                 check = True
 
-            if self.agentKB.is_there_wumpus(x1, y1):
+            if self.agent.kb.is_there_wumpus(x1, y1):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.wumpus_image, anchor=CENTER, tags="agentKB")
                 check = True
 
-            if self.agentKB.is_there_poison(x1, y1):
+            if self.agent.kb.is_there_poison(x1, y1):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.poison_image, anchor=CENTER, tags="agentKB")
                 check = True
 
-            if self.agentKB.is_there_healing(x1, y1):
+            if self.agent.kb.is_there_healing(x1, y1):
                 canvas.create_image(x1 + self.cell_size // 2, y1 + self.cell_size // 2, image=self.healing_poison_image, anchor=CENTER, tags="agentKB")
                 check = True
 
-            if self.agentKB.is_there_glow(x1, y1):
+            if self.agent.kb.is_there_glow(x1, y1):
                 canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="G_L", fill="blue", font="Arial 12", tags="agentKB")
                 check = True
             
-            if self.agentKB.is_there_stench(x1, y1):
+            if self.agent.kb.is_there_stench(x1, y1):
                 canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="S", fill="red", font="Arial 12", tags="agentKB")
-                #print((x_u,y_u),'have stench')
                 check = True
             
-
-            if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and self.agentKB.is_there_not_glow(x1, y1) and self.agentKB.is_there_not_stench and check == False:
+            if self.agent.kb.is_there_not_pit(x1, y1) and self.agent.kb.is_there_not_wumpus(x1, y1) and self.agent.kb.is_there_not_poison(x1, y1) and self.agent.kb.is_there_not_healing(x1, y1) and self.agent.kb.is_there_not_glow(x1, y1) and self.agent.kb.is_there_not_stench and check == False:
                 self.update_grid(x_u, y_u, "blue", canvas=canvas)
             else:
                 self.update_grid(x_u, y_u, "white", canvas=canvas)
@@ -200,7 +199,6 @@ class App:
             self.default_text = filename
             self.program = Program(self.default_text)
             self.agent = Agent(self.program.get_env_info, self.program.is_scream)
-            self.agentKB = self.agent.kb
             self.show_main_frame()
         else:
             messagebox.showerror("Error", "File not found. Please enter a valid file path.")
