@@ -328,11 +328,12 @@ class AgentKB:
 # result_pit = agent_kb.is_there_pit(1, 3)
 # print(f"Is there a pit at (1,3)? {'Yes' if result_pit else 'do not know'}")
 
-agent_kb = AgentKB()
-agent_kb.tell('S', 2, 2)
-
-if agent_kb.is_there_stench(2,2):
-    print('yes')
+# agent_kb = AgentKB()
+# agent_kb.tell('S', 2, 2)
+# agent_kb.tell('-',2,1)
+# agent_kb.tell('S', 1, 1)
+# if agent_kb.is_there_stench(2,2):
+#     print('yes')
 # agent_kb.tell('S', 3, 4)
 # agent_kb.tell('S', 4, 3)
 # agent_kb.tell('S', 3, 2)
@@ -346,3 +347,12 @@ if agent_kb.is_there_stench(2,2):
 # # agent_kb.tell('', 4, 4)
 
 # print(f"Is there a wumpus at (3,3)? {agent_kb.is_there_wumpus(3, 3)}")
+
+agent_kb = AgentKB()
+agent_kb.tell('W', 2, 2)
+agent_kb.tell('S P P_G', 2, 1)
+agent_kb.tell('S', 1, 2)
+agent_kb.tell('S', 2, 3)
+agent_kb.tell('S', 3, 2)
+print(agent_kb.is_there_stench(2, 1))
+print(agent_kb.is_there_not_wumpus(2,2))
