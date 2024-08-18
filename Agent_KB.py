@@ -41,7 +41,7 @@ class AgentKB:
             clauses.extend(new)
 
     def isValid(self,x,y):
-        if x >= 1 and x <= 10 and y>=1 and y <= 10:
+        if x >= 1 and x <= 10 and y >= 1 and y <= 10:
             return True
         return False
     
@@ -88,168 +88,119 @@ class AgentKB:
     def tell(self, percepts, x,y):
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
-        tu_list = percepts.split()
-
-        check_not_B = True
-        check_not_S = True
-        check_not_WH = True
-        check_not_GL = True
-        check_not_P = True
-        check_not_W = True
-        
-        check_not_PG = True
-        check_not_HP = True
-
-        for tu in tu_list:
-            if tu == 'B':
-                tmp = []
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        tmp.append(self.pos_literal_pit(x_new, y_new))
-                self.add_clause(tmp)
-                check_not_B = False
-            
-
-                    
-                    
-            if tu == 'S':
-                # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
-                tmp = []
-                tmp.append(self.neg_literal_stench(x,y))
-                tmp.append(self.neg_literal_reliable_stench(x,y))
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        #add (S and R_S) -> W
-                        tmp.append(self.pos_literal_wumpus(x_new, y_new))
-                        
-                self.add_clause(tmp)
-                #add S
-                self.add_single_clause(self.pos_literal_stench(x,y))
-                # add R_S
-                self.add_single_clause(self.pos_literal_reliable_stench(x,y))
-                check_not_S = False
-
-            
-                
-                
-                    
-                    
-            if tu == 'W_H':
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        tmp.append(self.pos_literal_poison(x_new, y_new))
-                self.add_clause(tmp)
-                check_not_WH = False
-            
-                
-                    
-                    
-            if tu == 'G_L':
-                tmp = []
-                tmp.append(self.neg_literal_glow(x,y))
-                tmp.append( self.neg_literal_reliable_glow(x,y))
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        # add (G and R_G) -> H, add G, add R_G
-                        tmp.append(self.pos_literal_healing(x_new, y_new))
-                        
-                self.add_clause(tmp)
-                #add G
-                self.add_single_clause(self.pos_literal_glow(x,y))
-                # add R_G
-                self.add_single_clause(self.pos_literal_reliable_glow(x,y))
-                check_not_GL = False
-            
-                
-                        
-
-                    
-                    
-            if tu == 'P':
-                self.add_clause([self.pos_literal_pit(x,y)])
-                check_not_P = False
-            
-                
-
-            if tu == 'W':
-                self.add_clause([self.pos_literal_wumpus(x,y)])
-                check_not_W = False
-            
-                
-                    
-                    
-                    
-                
-                
-            if  tu == 'P_G':
-                self.add_clause([self.pos_literal_poison(x,y)])
-                check_not_PG = False
-            
-                
-        
-                    
-            if tu == 'H_P':
-                self.add_clause([self.pos_literal_healing(x,y)])
-                check_not_HP = False
-            
-                
-        
-        if check_not_B:
-            
+        if 'B' in percepts:
+            tmp = []
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    tmp.append(self.pos_literal_pit(x_new, y_new))
+            self.add_clause(tmp)
+        else:
             tmp = []
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
                     self.add_single_clause(self.neg_literal_pit(x_new,y_new))
-        if check_not_S:
-            # add not S
-                self.add_single_clause(self.neg_literal_stench(x,y))
-                # add R_S
-                self.add_single_clause(self.pos_literal_reliable_stench(x,y))
-                #add not wumpus
-                for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        # add not W
-                        self.add_single_clause(self.neg_literal_wumpus(x_new,y_new))
-        if check_not_WH:
+                
+                
+        if 'S' in percepts:
+            # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
+            tmp = []
+            tmp.append(self.neg_literal_stench(x,y))
+            tmp.append(self.neg_literal_reliable_stench(x,y))
             for k in range(4):
-                    x_new = x + dx[k]
-                    y_new = y + dy[k]
-                    if self.isValid(x_new,y_new):
-                        self.add_single_clause(self.neg_literal_poison(x_new,y_new))
-        if check_not_GL:
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    #add (S and R_S) -> W
+                    tmp.append(self.pos_literal_wumpus(x_new, y_new))
+                    
+            self.add_clause(tmp)
+            #add S
+            self.add_single_clause(self.pos_literal_stench(x,y))
+            # add R_S
+            self.add_single_clause(self.pos_literal_reliable_stench(x,y))
+        else:
+            # add not S
+            self.add_single_clause(self.neg_literal_stench(x,y))
+            # add R_S
+            self.add_single_clause(self.pos_literal_reliable_stench(x,y))
+            #add not wumpus
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    # add not W
+                    self.add_single_clause(self.neg_literal_wumpus(x_new,y_new))
+            
+                
+                
+        if 'W_H' in percepts:
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    tmp.append(self.pos_literal_poison(x_new, y_new))
+            self.add_clause(tmp)
+        else:
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    self.add_single_clause(self.neg_literal_poison(x_new,y_new))
+                
+                
+        if 'G_L' in percepts:
+            tmp = []
+            tmp.append(self.neg_literal_glow(x,y))
+            tmp.append( self.neg_literal_reliable_glow(x,y))
+            for k in range(4):
+                x_new = x + dx[k]
+                y_new = y + dy[k]
+                if self.isValid(x_new,y_new):
+                    # add (G and R_G) -> H, add G, add R_G
+                    tmp.append(self.pos_literal_healing(x_new, y_new))
+                    
+            self.add_clause(tmp)
+            #add G
+            self.add_single_clause(self.pos_literal_glow(x,y))
+            # add R_G
+            self.add_single_clause(self.pos_literal_reliable_glow(x,y))
+        else:
             #add not G
             self.add_single_clause(self.neg_literal_glow(x,y))
-                # add R_G
+            # add R_G
             self.add_single_clause(self.pos_literal_reliable_glow(x,y))
-                # add not H
+            # add not H
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
                     self.add_single_clause(self.neg_literal_healing(x_new, y_new))
-        if check_not_P:
-            self.add_single_clause(self.neg_literal_pit(x,y))
-        if check_not_W:
-            self.add_single_clause(self.neg_literal_wumpus(x,y))
-        if check_not_PG:
-            self.add_single_clause(self.neg_literal_poison(x,y))
-        if check_not_HP:
-            self.add_single_clause(self.neg_literal_healing(x,y))
-
+                    
                 
-
+                
+        if 'P' in percepts:
+            self.add_clause([self.pos_literal_pit(x,y)])
+        else:
+            self.add_single_clause(self.neg_literal_pit(x,y))
+        if 'W' in percepts:
+            self.add_clause([self.pos_literal_wumpus(x,y)])
+        else:
+            self.add_single_clause(self.neg_literal_wumpus(x,y))
+        
+        if  'P_G' in percepts:
+            self.add_clause([self.pos_literal_poison(x,y)])
+        else:
+            self.add_single_clause(self.neg_literal_poison(x,y))
+    
+        
+        if 'H_P' in percepts:
+            self.add_clause([self.pos_literal_healing(x,y)])
+        else:
+            self.add_single_clause(self.neg_literal_healing(x,y))
 
     # Khẳng định
     def pos_literal_pit(self, x, y):

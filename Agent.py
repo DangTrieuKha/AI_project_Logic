@@ -53,12 +53,12 @@ class Agent:
             limit += 1
 
     def __get_path(self, start, goal):
-        for line in self.map_explored:
-            print(line)
-        print(self.pending_position)
-        print(start, goal)
+        # for line in self.map_explored:
+        #     print(line)
+        # print(self.pending_position)
+        # print(start, goal)
         result = self.__iterative_deepening_search(start, goal)[::-1]
-        print(result)
+        # print(result)
         return result
 
     def __path_to_actions(self, path):
@@ -148,17 +148,14 @@ class Agent:
         #             print((x,y), 'have stench')
         #         else:
         #             print((x,y), 'do not have stench')
-            
         if 'P_G' in tmp:
             self.update_map_explored('-1')
-            if 'G' in tmp and tmp.index('G') != tmp.index('P_G') + 2:
-                self.state.act('GRAB')
-                return
         else:
             self.update_map_explored('0')
-            if 'G' in tmp:
-                self.state.act('GRAB')
-                return
+        
+        if 'G' in tmp:
+            self.state.act('GRAB')
+            return
         
         next, neighbors = self.state.get_forward_and_neighbors()
         
@@ -174,8 +171,6 @@ class Agent:
         if 'S' not in tmp and 'B' not in tmp:
             self.state.act(self.state.get_next_action())
             for neighbor in neighbors:
-                if not self.kb.is_there_not_pit(neighbor[0], neighbor[1]):
-                    continue
                 if self.is_explored(neighbor[0], neighbor[1]):
                     continue
                 
@@ -258,6 +253,8 @@ class Agent:
 
     def update_visited(self):
         self.visited.add(self.state.position)
+        if self.state.position in self.pending_position:
+            self.pending_position.remove(self.state.position)
 
     def run(self):
         self.move()

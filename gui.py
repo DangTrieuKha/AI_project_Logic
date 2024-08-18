@@ -71,45 +71,43 @@ class App:
 
         x, y = j * self.cell_size, i * self.cell_size
 
-        tu_list = cell.split()
-        n = len(tu_list)
+        n = len(cell)
         for i in range(n):
             if n == 1:
                 x_s, y_s = x + self.cell_size // 2, y + self.cell_size // 2
             else:
                 x_s, y_s = x + self.cell_size // 2 - 10 + i * 20, y + self.cell_size // 2
-            if mode == 1 and tu_list[i] == 'A':
+            if mode == 1 and cell[i] == 'A':
                 canvas.create_image(x_s, y_s, image=self.player_image_down, anchor=CENTER)
-            if tu_list[i] == 'G':
+            if cell[i] == 'G':
                 canvas.create_image(x_s, y_s, image=self.gold_image, anchor=CENTER)
             
-            if tu_list[i] == 'W':
+            if cell[i] == 'W':
                 canvas.create_image(x_s, y_s, image=self.wumpus_image, anchor=CENTER) 
 
-            if tu_list[i] == 'S':
+            if cell[i] == 'S':
                 canvas.create_text(x_s, y_s + self.cell_size // 4, text="S", fill="brown", font="Arial 12", tags="element")
             
-            if tu_list[i] == 'P':
+            if cell[i] == 'P':
                 canvas.create_image(x_s, y_s, image=self.pit_image, anchor=CENTER)
-            if tu_list[i] == 'B':
+            if cell[i] == 'B':
                 canvas.create_text(x_s, y_s, text="B", fill="green", font="Arial 12", tags="element")
 
-            if tu_list[i] == 'H_P':
+            if cell[i] == 'H_P':
                 canvas.create_image(x_s, y_s, image=self.healing_poison_image, anchor=CENTER)
-            if tu_list[i] == 'G_L':
+            if cell[i] == 'G_L':
                 canvas.create_text(x_s, y_s + self.cell_size // 4, text="G_L", fill="blue", font="Arial 12", tags="element")    
             
-            if tu_list[i] == 'P_G':
+            if cell[i] == 'P_G':
                 canvas.create_image(x_s, y_s, image=self.poison_image, anchor=CENTER)
-            if tu_list[i] == 'W_H':
+            if cell[i] == 'W_H':
                 canvas.create_text(x_s , y_s - self.cell_size // 4, text="W_H", fill="red", font="Arial 12", tags="element")
 
     def draw_elements(self, canvas, mode):
         canvas.delete("element")
-        for i, row in enumerate(self.program.map):
-            for j, cell in enumerate(row):
-                self.draw_element_i(i, j, cell, mode, canvas=canvas)
-        
+        for i in range(len(self.program.map)):
+            for j in range(len(self.program.map[i])):
+                self.draw_element_i(i, j, self.program.map[i][j], mode, canvas)
     
     def draw_agent(self, state, canvas):
         canvas.delete("agent")
@@ -136,7 +134,8 @@ class App:
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
         list_agentKB = []
-        list_agentKB.append((x, y))
+        #list_agentKB.append((x, y))
+        self.update_grid(x, y, "white", canvas=canvas)
         for i in range(4):
             x1 = x + dx[i]
             y1 = y + dy[i]
@@ -184,8 +183,8 @@ class App:
             #         if not self.agent.kb.is_there_not_pit(x_u, y_u) and not self.agent.kb.is_there_not_wumpus(x_u, y_u) and not self.agent.kb.is_there_not_poison(x_u, y_u) and not self.agent.kb.is_there_not_healing(x_u, y_u) and not self.agent.kb.is_there_not_glow(x_u, y_u) and not self.agent.kb.is_there_not_stench(x_u, y_u):
             #             self.update_grid(x_u, y_u, "white", canvas=canvas)
             #print(x_u, y_u, check)
-        #x_m, y_m = 10 - y, x - 1
-        #self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.agentKB_canvas)
+        x_m, y_m = 10 - y, x - 1
+        self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.agentKB_canvas)
             
 
     def on_entry_click(self, event):
@@ -315,7 +314,7 @@ class App:
 
         self.right_label = tk.Label(self.map_environment_frame, text="Knowledge base", font=("Arial", 16))
         self.right_label.pack(side='right', padx=(0, 0), expand=True)
-       
+
 
         self.score_label = tk.Label(self.map_agent_frame, text=f"Score: {self.program.get_score}", font=("Arial", 14), bg="white")
         self.score_label.pack()
@@ -406,11 +405,12 @@ class App:
             for j in range(1, cols + 1):
                 if (i, j) in self.agentKB_list:
                     self.update_grid(i, j, "gray", self.agentKB_canvas)
+                self.update_grid(i, j, "white", self.program_canvas)
+                self.draw_element_i(10 - j, i - 1, self.program.map[10 - j][i - 1], 0, self.program_canvas)
         # màu = "white" thay vì "green"
         
-        self.update_grid(x, y, "white", self.agentKB_canvas)
-        self.update_grid(x, y, "white", self.program_canvas)
-        x_m, y_m = 10 - y, x - 1
+        #self.update_grid(x, y, "white", self.program_canvas)
+        #x_m, y_m = 10 - y, x - 1
         
         # update trạng thái của agent trong map của agentKB
         
@@ -418,15 +418,18 @@ class App:
         self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         # update trạng thái của agent trong map của program
-        #self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.program_canvas)
-        self.draw_elements(self.program_canvas, 0)
+        #self.program_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
+        #self.program_canvas.pack(side='left', padx=(10, 5), pady=(5, 5))
+        #self.draw_grid(self.program_canvas)
+        #self.draw_elements(self.program_canvas, 0)
+
         self.draw_agent(self.agent.state, self.program_canvas)
         
         self.score_label.config(text=f"Score: {self.program.get_score()}")
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
         
-        for i in range(rows):
-            print(self.program.map[i])
+        # for i in range(rows):
+        #     print(self.program.map[i])
 
         self.agent.run()
         self.action_label.config(text=f"Action: {self.action()}")
@@ -442,9 +445,7 @@ class App:
             # self.auto_run_button.config(state="disabled")
             self.next_step()
             self.root.update()
-            self.root.after(100)
-            if self.program.run() == "Finished":
-                break
+            self.root.after(50)
 
     def action(self):
         actions = self.program.agent_state.get_actions()
@@ -460,6 +461,8 @@ class App:
         if self.program.is_scream():
             thread = threading.Thread(target=self.play_sound)
             thread.start()
+                    
+            
     def check_file_exists(self, filename):
         return os.path.isfile(filename)
     
@@ -471,4 +474,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     game = App(root)
     root.mainloop()
-
