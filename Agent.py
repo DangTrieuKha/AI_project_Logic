@@ -268,6 +268,8 @@ class Agent:
                 # Implement logic to go around to grab the healing potion
                 return
 
+        self.__climb_out()
+
     def update_visited(self):
         self.visited.add(self.state.position)
         if self.state.position in self.pending_position:
