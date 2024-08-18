@@ -130,7 +130,11 @@ class App:
     def draw_agentKB(self, state, canvas):
         canvas.delete("agentKB")
         x, y = state.get_position()
-        
+        if self.agentKB.is_there_stench(x, y):
+                canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="B", fill="green", font="Arial 12", tags="agentKB")
+                print((x,y),'have stench')
+        else:
+            print((x,y), 'do not have stench')
         dx = [-1, 1, 0, 0]
         dy = [0,0,-1,1]
         list_agentKB = []
@@ -143,6 +147,7 @@ class App:
                     self.agentKB_list.append((x1, y1))
 
         #for x1, y1 in self.agentKB_list:
+        print((x,y),':' )
         for x1, y1 in list_agentKB:
             x_u, y_u = copy.deepcopy(x1), copy.deepcopy(y1)
             x1 = (x1 - 1) * self.cell_size
@@ -170,7 +175,10 @@ class App:
             
             if self.agentKB.is_there_stench(x1, y1):
                 canvas.create_text(x1 + self.cell_size // 2, y1 + self.cell_size // 2, text="B", fill="green", font="Arial 12", tags="agentKB")
+                print((x_u,y_u),'have stench')
                 check = True
+            else:
+                print((x_u,y_u),'do not have stench')
 
             if self.agentKB.is_there_not_pit(x1, y1) and self.agentKB.is_there_not_wumpus(x1, y1) and self.agentKB.is_there_not_poison(x1, y1) and self.agentKB.is_there_not_healing(x1, y1) and self.agentKB.is_there_not_glow(x1, y1) and self.agentKB.is_there_not_stench and check == False:
                 self.update_grid(x_u, y_u, "blue", canvas=canvas)
