@@ -155,14 +155,12 @@ class Program:
             self.update_score(-100)
             self.update_map()
             self.agent_state.actions['SHOOT'] = False
-            #self.update_percepts()
         elif actions['GRAB']:
             self.update_score(-10)
             if self.map[10 - self.agent_state.get_position()[1]][self.agent_state.get_position()[0] - 1] == 'G':
                 self.update_score(5000)
             self.update_map()
             self.agent_state.actions['GRAB'] = False
-            #self.update_percepts()
         elif actions['TURN_LEFT']:
             self.update_score(-10)
             self.agent_state.actions['TURN_LEFT'] = False
@@ -173,11 +171,11 @@ class Program:
         x, y = self.agent_state.get_position()
         print(self.map[10 - y][x - 1])
 
-        if 'W' in self.map[10 - y][x - 1]:
+        if len(self.map[10 - y][x - 1]) == 1 and self.map[10 - y][x - 1] == 'P':
             self.update_score(-10000)
             return self.end_game()
         
-        for i in range(len(self.map[10 - y][x - 1])):
+        for i in range(len(self.map[10 - y][x - 1]) - 1):
             if self.map[10 - y][x - 1][i] == 'P' and self.map[10 - y][x - 1][i + 1] != '_':
                 self.update_score(-10000)
                 return self.end_game()

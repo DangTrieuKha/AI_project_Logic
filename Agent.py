@@ -12,6 +12,7 @@ class Agent:
         self.pending_actions = []
         self.map_explored = [['-1' for _ in range(10)] for _ in range(10)]
         self.visited = {(1, 1)}    # = set(): Set of visited positions
+        self.turn_count = 0
 
     def update_map_explored(self, value, x=None, y=None):
         if x is not None and y is not None:
@@ -108,9 +109,21 @@ class Agent:
     def __evaluate_cost(self, list_actions):
         return 10 * len(list_actions) if list_actions is not None else 10000
 
+    def __climb_out(self):
+        path = self.__get_path(self.state.position, (1, 1))
+        actions = self.__path_to_actions(path)
+        self.pending_actions = actions
+        self.pending_actions.append('CLIMB')
+        self.run()
+
     def move(self):
         if self.state.agent_health == 25:
             self.state.act('HEAL')
+            return
+        
+        if self.is_scream():
+            self.state.act('SHOOT')
+            self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
             return
 
         if self.pending_actions != []:
@@ -151,7 +164,12 @@ class Agent:
         
         if next in self.visited:
             self.state.act('TURN_RIGHT')
+            self.turn_count += 1
+            if self.turn_count > 3:
+                self.__climb_out()
             return
+        else:
+            self.turn_count = 0
         
         if 'S' not in tmp and 'B' not in tmp:
             self.state.act(self.state.get_next_action())
@@ -170,14 +188,10 @@ class Agent:
         next_x, next_y = next
 
         if self.kb.is_there_wumpus(next_x, next_y):
-            print(tmp)
             if self.kb.is_there_not_pit(next_x, next_y):
                 self.state.act('SHOOT')
-                if not self.is_scream():
-                    self.pending_actions.append('MOVE_FORWARD')
-                else:
-                    self.pending_actions.append('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+                self.pending_actions = ['MOVE_FORWARD']
                 return
 
             if self.pending_position != set():
@@ -193,10 +207,8 @@ class Agent:
                 return
             else:
                 self.state.act('SHOOT')
-                if not self.is_scream():
-                    self.pending_actions.append('MOVE_FORWARD')
-                else:
-                    self.pending_actions.append('SHOOT')
+                self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+                self.pending_actions = ['MOVE_FORWARD']
 
         elif self.kb.is_there_not_wumpus(next_x, next_y):
             if self.kb.is_there_not_pit(next_x, next_y):
@@ -215,16 +227,12 @@ class Agent:
                 return
         else:
             if 'S' in tmp:
-                # print('It goes here')
                 self.state.act('SHOOT')
-                if not self.is_scream():
-                    self.pending_actions.append('MOVE_FORWARD')
-                else:
-                    self.pending_actions.append('SHOOT')
+                self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+                self.pending_actions = ['MOVE_FORWARD']
                 return
             
             if 'B' in tmp:
-
                 if self.pending_position != set():
                     position = list(self.pending_position)[-1]
                     self.pending_position.remove(position)
@@ -247,11 +255,6 @@ class Agent:
             # Temporary logic to move forward
             self.state.act('MOVE_FORWARD')
             return
-
-        path = self.__get_path(self.state.position, (1, 1))
-        actions = self.__path_to_actions(path)
-        self.pending_actions = actions
-        self.pending_actions.append('CLIMB')
 
     def update_visited(self):
         self.visited.add(self.state.position)
