@@ -24,6 +24,7 @@ class App:
             print(f"Không thể tải âm thanh: {e}")
             return
 
+        self.auto_running = False
     
         self.default_input_text = "Enter relative path of file..."
         self.default_text = None
@@ -55,9 +56,9 @@ class App:
     def draw_grid(self, canvas):
         rows = len(self.program.map)
         cols = len(self.program.map[0])
-        for i in range(rows):
-            for j in range(cols):
-                x0, y0 = j * self.cell_size, i * self.cell_size
+        for i in range(rows + 1):
+            for j in range(cols + 1):
+                x0, y0 = (j - 1) * self.cell_size, (i - 1) * self.cell_size
                 x1, y1 = x0 + self.cell_size, y0 + self.cell_size
                 canvas.create_rectangle(x0, y0, x1, y1, outline="black")
 
@@ -299,6 +300,7 @@ class App:
         self.clear_frame(self.map_agent_frame)
         self.map_agent_frame.pack(expand=True, anchor='center')
 
+        self.auto_running = False  # Tắt auto_run khi người dùng quay lại
         self.program = Program(self.default_text)
         self.agent = Agent(self.program.get_env_info, self.program.is_scream)
 
@@ -315,11 +317,11 @@ class App:
         self.right_label.pack(side='right', padx=(0, 0), expand=True)
 
 
-        self.score_label = tk.Label(self.map_agent_frame, text=f"Score: {self.program.get_score}", font=("Arial", 14), bg="white")
+        self.score_label = tk.Label(self.map_agent_frame, text=f"Score: {self.program.get_score}", font=("Arial", 14), bg="white", width=20, height=1)
         self.score_label.pack()
         self.score_label.config(text=f"Score: {self.program.get_score()}")
 
-        self.health_label = tk.Label(self.map_agent_frame, text=f"Health: {self.program.agent_state.get_health}", font=("Arial", 14), bg="white")
+        self.health_label = tk.Label(self.map_agent_frame, text=f"Health: {self.program.agent_state.get_health}", font=("Arial", 14), bg="white", width=20, height=1)
         self.health_label.pack()
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
 
@@ -352,7 +354,7 @@ class App:
         self.draw_agent(self.agent.state, self.agentKB_canvas)
 
         action = self.action()
-        self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white")
+        self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white", width=30, height=2)   
         self.action_label.pack()
         self.score_label.config(text=f"Action: {action}")
 
@@ -370,6 +372,7 @@ class App:
         self.back_run.pack(pady=(5, 5))
 
     def back_button_behavior(self):
+        self.auto_running = False  # Tắt auto_run khi người dùng quay lại
         if self.program.run() == "Finished":
             # nếu chạy self.program.run để lấy trạng thái kết thúc game
             # thì sẽ bị tăng thêm 10đ do CLIMB
@@ -390,6 +393,9 @@ class App:
         self.score_label = tk.Label(self.end_frame, text=f"Score: {self.program.get_score()}", font=("Arial", 16), fg="black")
         self.score_label.pack(pady=(10, 10))
         self.score_label.config(text=f"Score: {self.program.get_score()}")
+
+        self.program = None
+        self.agent = None
 
         self.back_welcome_frame = tk.Button(self.end_frame, text="Back to Welcome Screen", command=self.show_welcome_frame, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.back_welcome_frame.pack(pady=(10, 10))
@@ -433,11 +439,13 @@ class App:
         if self.program.run() == "Finished":
             # self.next_step_button.config(state="disabled")
             # self.auto_run_button.config(state="disabled")
+            self.auto_running = False   
             self.show_end_frame()
         
 
     def auto_run(self):
-        while True:
+        self.auto_running = True
+        while self.auto_running:
             # self.auto_run_button.config(state="disabled")
             self.next_step()
             self.root.update()
