@@ -138,7 +138,7 @@ class Agent:
 
     def move(self):
         next, neighbors = self.state.get_forward_and_neighbors()
-        tmp = self.get_env_info()
+        env_info = self.get_env_info()
         
         if self.is_scream():
             self.state.act('SHOOT')
@@ -150,9 +150,9 @@ class Agent:
             while self.kb.is_there_wumpus(next[0], next[1]):
                 self.kb.assertNoWumpusPostShoot(next[0], next[1])
 
-        self.kb.tell(tmp, self.state.position[0], self.state.position[1])
+        self.kb.tell(env_info, self.state.position[0], self.state.position[1])
 
-        if self.state.agent_health == 25 and 'W_H' in tmp and self.state.agent_number_of_HL > 0:
+        if self.state.agent_health == 25 and 'W_H' in env_info and self.state.agent_number_of_HL > 0:
             self.state.act('HEAL')
             return
 
@@ -164,27 +164,27 @@ class Agent:
                 self.kb.assertNoHealingPostGrab(self.state.position[0], self.state.position[1])
 
         if self.pending_actions != []:
-            if 'S' not in tmp and 'B' not in tmp:
+            if 'S' not in env_info and 'B' not in env_info:
                 self.__add_safe_position(neighbors)
             
-            if 'H_P' in tmp:
+            if 'H_P' in env_info:
                 self.state.act('GRAB')
                 self.prev_action = 'GRAB_H_P'
                 return
             
-            if 'G' in tmp:
+            if 'G' in env_info:
                 self.state.act('GRAB')
                 return
 
             self.state.act(self.pending_actions.pop(0))
             return
         
-        if 'H_P' in tmp:
+        if 'H_P' in env_info:
             self.state.act('GRAB')
             self.prev_action = 'GRAB_H_P'
             return
         
-        if 'G' in tmp:
+        if 'G' in env_info:
             self.state.act('GRAB')
             return
         
@@ -204,7 +204,7 @@ class Agent:
         else:
             self.turn_count = 0
 
-        if 'S' not in tmp and 'B' not in tmp:
+        if 'S' not in env_info and 'B' not in env_info:
             self.state.act('MOVE_FORWARD')
             self.__add_safe_position(neighbors)
             return
@@ -229,11 +229,11 @@ class Agent:
             if self.__move_to_safe_position():
                 return
         else:
-            if 'B' in tmp:
+            if 'B' in env_info:
                 if self.__move_to_safe_position():
                     return
                 
-            if 'S' in tmp:
+            if 'S' in env_info:
                 self.state.act('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
                 self.pending_actions = ['MOVE_FORWARD']
