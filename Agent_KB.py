@@ -173,22 +173,22 @@ class AgentKB:
                     self.add_single_clause(self.neg_literal_healing(x_new, y_new))
 
         if 'P' in percepts:
-            self.add_single_clause([self.pos_literal_pit(x,y)])
+            self.add_single_clause(self.pos_literal_pit(x,y))
         else:
             self.add_single_clause(self.neg_literal_pit(x,y))
         if 'W' in percepts:
-            self.add_single_clause([self.pos_literal_wumpus(x,y)])
+            self.add_single_clause(self.pos_literal_wumpus(x,y))
         else:
             self.add_single_clause(self.neg_literal_wumpus(x,y))
         
         if  'P_G' in percepts:
-            self.add_single_clause([self.pos_literal_poison(x,y)])
+            self.add_single_clause(self.pos_literal_poison(x,y))
         else:
             self.add_single_clause(self.neg_literal_poison(x,y))
-    
+     
         
         if 'H_P' in percepts:
-            self.add_single_clause([self.pos_literal_healing(x,y)])
+            self.add_single_clause(self.pos_literal_healing(x,y))
         else:
             self.add_single_clause(self.neg_literal_healing(x,y))
 
