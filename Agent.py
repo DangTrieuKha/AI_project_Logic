@@ -55,14 +55,14 @@ class Agent:
         return None
 
     def __get_path(self, start, goal):
-        for line in self.map_explored:
-            print(line)
-        print(self.pending_position)
-        print(start, goal)
+        # for line in self.map_explored:
+        #     print(line)
+        # print(self.pending_position)
+        # print(start, goal)
         result = self.__iterative_deepening_search(start, goal)
         if result is not None:
             result.reverse()
-        print(result)
+        # print(result)
         return result
 
     def __path_to_actions(self, path):
@@ -111,9 +111,6 @@ class Agent:
                     current_direction = 'LEFT'
             actions.append('MOVE_FORWARD')
         return actions
-
-    def __evaluate_cost(self, list_actions):
-        return 10 * len(list_actions) if list_actions is not None else 10000
 
     def __climb_out(self):
         path = self.__get_path(self.state.position, (1, 1))
