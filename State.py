@@ -31,8 +31,6 @@ class State:
                 self.healing()
             else:
                 self.actions['HEAL'] = False
-        elif action == 'GRAB':
-            self.agent_number_of_HL += 1
 
         self.prev_position = self.position
 

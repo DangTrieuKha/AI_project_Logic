@@ -103,6 +103,8 @@ class Program:
                 for i_x, i_y in adjacent:
                     if 'G_L' in self.map[i_x][i_y]:
                         self.map[i_x][i_y].remove('G_L')
+
+                self.agent_state.agent_number_of_HL += 1
                 return
 
         elif self.agent_state.actions['SHOOT']:
