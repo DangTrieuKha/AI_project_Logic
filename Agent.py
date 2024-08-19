@@ -155,7 +155,7 @@ class Agent:
         tmp = self.get_env_info()
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
 
-        if self.state.agent_health == 25 and 'W_H' in tmp:
+        if self.state.agent_health == 25 and 'W_H' in tmp and self.state.agent_number_of_HL > 0:
             self.state.act('HEAL')
             return
 
