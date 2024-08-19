@@ -9,6 +9,7 @@ class State:
 
     def __init__(self) -> None:
         self.position = (1, 1)
+        self.prev_position = None
         self.direction = 'UP'
         self.actions = {'SHOOT': False, 'GRAB': False, 'CLIMB': False, 'MOVE_FORWARD': False, 'TURN_LEFT': False, 'TURN_RIGHT': False, 'HEAL':False}
         self.agent_health = 100
@@ -23,9 +24,7 @@ class State:
         elif action == 'MOVE_FORWARD':
             self.move_forward()
         elif action == 'CLIMB':
-            if self.position == (1, 1):
-                return True
-            else:
+            if self.position != (1, 1):
                 self.actions['CLIMB'] = False
         elif action == 'HEAL':
             if self.agent_number_of_HL > 0:
@@ -34,6 +33,8 @@ class State:
                 self.actions['HEAL'] = False
         elif action == 'GRAB':
             self.agent_number_of_HL += 1
+
+        self.prev_position = self.position
 
     def healing(self):
         self.agent_health += 25
@@ -90,12 +91,6 @@ class State:
         if x < 10:
             neighbors.append((x + 1, y))
         return neighbors
-    
-    def get_next_action(self):
-        if self.get_forward_location() != False:
-            return 'MOVE_FORWARD'
-        else:
-            return 'TURN_RIGHT'
 
     def move_forward(self):
         if self.direction == 'UP' and self.position[1] < 10:
@@ -111,6 +106,9 @@ class State:
 
     def get_position(self):
         return self.position
+
+    def get_prev_position(self):
+        return self.prev_position
     
     def get_direction(self):
         return self.direction

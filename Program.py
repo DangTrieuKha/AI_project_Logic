@@ -7,11 +7,13 @@ class Program:
         self.agent_state = State()
         self.agent_score = 0
         self.scream = False # is there scream at current cell of agent
+        self.result = []
     
     def load_map(self, map_file) -> list[list[list[str]]]:
+        self.test_index = map_file.split('.')[0][-1]
         with open(map_file, 'r') as file:
             lines = file.readlines()
-            # n = int(lines[0])
+            n = int(lines[0])
             grid = []
             for line in lines[1:]:
                 grid.append([cell.split(' ') for cell in line.strip().split('.')])
@@ -150,11 +152,15 @@ class Program:
 
     def end_game(self):
         print(f"Game End! Score: {self.agent_score}")
+        with open(f"result{self.test_index}.txt", 'w') as file:
+            output = '\n'.join(self.result)
+            file.write(output)
         return "Finished"
 
     def run(self):
         self.scream = False
         actions = self.agent_state.get_actions()
+        self.result.append(f"Position: {self.agent_state.get_prev_position()}, Direction: {self.agent_state.get_direction()}, Actions: {[action for action, value in actions.items() if value][0]}, Score: {self.agent_score}")
         if actions['CLIMB']:
             self.update_score(10)
             return self.end_game()

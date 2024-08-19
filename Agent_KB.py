@@ -26,7 +26,7 @@ class AgentKB:
 
         return not res
 
-    def isValid(self,x,y):
+    def isValid(self, x, y):
         if x >= 1 and x <= 10 and y >= 1 and y <= 10:
             return True
         return False
@@ -42,10 +42,8 @@ class AgentKB:
         #     return
 
         for k in self.kb.clauses:
-            if pos_clause in k and (pos_clause in range(411, 812) or pos_clause in range(-811,-412) or pos_clause in range(111, 211 + 1) or pos_clause in range(311, 411 + 1) or pos_clause in range(-411, -311 + 1) or pos_clause in range(-211, -111 + 1)) and len(k) == 1:
+            if pos_clause in k and (pos_clause in range(411, 811) or pos_clause in range(-810,-411 + 1) or pos_clause in range(111, 211) or pos_clause in range(311, 411) or pos_clause in range(-410, -311 + 1) or pos_clause in range(-210, -111 + 1)) and len(k) == 1:
                 
-
-
                 # new_clause = [lit for lit in k if lit != pos_clause]
                 # if len(new_clause) == 1:
                 #     if pos_clause in range(111, 211 + 1) or pos_clause in range(311, 411 + 1) or pos_clause in range(-411, -311 + 1) or pos_clause in range(-211, -111 + 1):
