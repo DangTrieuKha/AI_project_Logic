@@ -168,6 +168,7 @@ class Program:
         actions = self.agent_state.get_actions()
         if actions['CLIMB']:
             self.update_score(10)
+            self.result.append(f"Position: {self.agent_state.get_prev_position()}, Direction: {self.agent_state.get_direction()}, Actions: {[action for action, value in actions.items() if value][0]}, Score: {self.agent_score}")
             return self.end_game()
         elif actions['MOVE_FORWARD']:
             self.update_score(-10)
@@ -186,14 +187,15 @@ class Program:
         elif actions['TURN_RIGHT']:
             self.update_score(-10)
             self.agent_state.actions['TURN_RIGHT'] = False
-        
-        self.result.append(f"Position: {self.agent_state.get_prev_position()}, Direction: {self.agent_state.get_direction()}, Actions: {[action for action, value in actions.items() if value][0]}, Score: {self.agent_score}")
 
         x, y = self.agent_state.get_position()
 
         if 'W' in self.map[10 - y][x - 1] or 'P' in self.map[10 - y][x - 1]:
             self.update_score(-10000)
+            self.result.append(f"Position: {self.agent_state.get_prev_position()}, Direction: {self.agent_state.get_direction()}, Actions: {[action for action, value in actions.items() if value][0]}, Score: {self.agent_score}")
             return self.end_game()
+        
+        self.result.append(f"Position: {self.agent_state.get_prev_position()}, Direction: {self.agent_state.get_direction()}, Actions: {[action for action, value in actions.items() if value][0]}, Score: {self.agent_score}")
         
         if 'P_G' in self.map[10 - y][x - 1]:
             self.agent_state.poison()
