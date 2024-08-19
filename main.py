@@ -233,7 +233,10 @@ class App:
         self.clear_frame(self.welcome_frame)
         self.welcome_frame.pack(expand=True, anchor='center')
 
-        self.label = tk.Label(self.welcome_frame, text="Welcome to Wumpus World", font=("Helvetica", 16), fg="black")
+        self.label = tk.Label(self.welcome_frame, 
+                          text="Welcome to Wumpus World!", 
+                          font=("Comic Sans MS", 24, "bold"),  # Thay đổi font chữ và kích thước
+                          fg="black") 
         self.label.pack(pady=(20, 20))
 
         self.main_frame = tk.Frame(root)
@@ -250,11 +253,11 @@ class App:
         self.entry.pack(side='left', padx=(0, 5), fill='x', expand=True)
 
         # Tạo button Enter và đặt nó trong frame con
-        self.button_enter_input = tk.Button(self.entry_frame, text="Enter", command=self.enter_input, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
-        self.button_enter_input.pack(side='right')
+        self.button_enter_input = tk.Button(self.entry_frame, text="Enter", font=("Comic Sans MS", 12), command=self.enter_input, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
+        self.button_enter_input.pack(side='right', padx=(5, 0))
 
         # Tạo button Exit và đặt nó dưới frame con
-        self.button_exit = tk.Button(self.main_frame, text="Exit", command=root.quit, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
+        self.button_exit = tk.Button(self.main_frame, text="Exit", font=("Comic Sans MS", 12), command=root.quit, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
         self.button_exit.pack(pady=(10, 40))
 
         # Khởi tạo lại path và search_board
@@ -271,14 +274,14 @@ class App:
         self.button_mainframe.pack(pady=(40, 40))
 
         # Create 4 buttons and add them to the frame
-        self.input_button = tk.Button(self.button_mainframe, text="Show map", command=self.show_map, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.input_button = tk.Button(self.button_mainframe, text="Show map", font=("Comic Sans MS", 16, "bold") , command=self.show_map, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.input_button.pack(pady=(5, 5))
 
-        self.run_button = tk.Button(self.button_mainframe, text="Run", command=self.show_map_agent, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.run_button = tk.Button(self.button_mainframe, text="Run", font=("Comic Sans MS", 16, "bold"), command=self.show_map_agent, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.run_button.pack(pady=(5, 5))
 
         self.default_input_text = "Enter relative path of file..."
-        self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
+        self.exit_main = tk.Button(self.button_mainframe, text="Back", font=("Comic Sans MS", 16, "bold"), bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2", command=self.show_welcome_frame)
         self.exit_main.pack(pady=(5, 5))
 
         # [DEBUG ONLY, COMMENT OR DELETE WHEN DONE] show end game frame through button
@@ -311,7 +314,7 @@ class App:
         self.button_frame = tk.Frame(self.map_frame)
         self.button_frame.pack(pady=(10, 10))
 
-        self.back = tk.Button(self.button_frame, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.back = tk.Button(self.button_frame, text="Back", font=("Comic Sans MS", 12), command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.back.pack(pady=(5, 5))
 
     def show_map_agent(self):
@@ -329,10 +332,10 @@ class App:
         self.map_environment_frame = tk.Frame(self.map_agent_frame)
         self.map_environment_frame.pack(pady=(5, 5), fill='x')
 
-        self.left_label = tk.Label(self.map_environment_frame, text="ENVIRONMENT", font=("Arial", 16))
+        self.left_label = tk.Label(self.map_environment_frame, text="ENVIRONMENT", font=("Comic Sans MS", 16, "bold"), fg="#006666")
         self.left_label.pack(side='left', padx=(0, 50), expand=True)
 
-        self.right_label = tk.Label(self.map_environment_frame, text="KNOWLEDGE BASE", font=("Arial", 16))
+        self.right_label = tk.Label(self.map_environment_frame, text="KNOWLEDGE BASE", font=("Comic Sans MS", 16, "bold"), fg="#006666")
         self.right_label.pack(side='right', padx=(0, 150), expand=True)
 
         self.infor_frame = tk.Frame(self.map_agent_frame)
@@ -402,15 +405,15 @@ class App:
 
         self.button_frame_step_2 = tk.Frame(self.map_agent_frame)
         self.button_frame_step_2.pack(pady=(10, 5))
-        self.next_step_button = tk.Button(self.button_frame_step_2, text="Next Step", command=self.next_step, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.next_step_button = tk.Button(self.button_frame_step_2, text="Next Step", font=("Comic Sans MS", 12), command=self.next_step, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.next_step_button.pack(side = tk.LEFT ,padx=(0, 3))
-        self.auto_run_button = tk.Button(self.button_frame_step_2, text="Auto Run", command=self.auto_run, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.auto_run_button = tk.Button(self.button_frame_step_2, text="Auto Run", font=("Comic Sans MS", 12), command=self.auto_run, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.auto_run_button.pack(side = tk.RIGHT, padx=(8, 10))
 
         self.button_agent_frame = tk.Frame(self.map_agent_frame)
         self.button_agent_frame.pack(pady=(10, 5))
 
-        self.back_run = tk.Button(self.button_agent_frame, text="Back", command=self.back_button_behavior, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.back_run = tk.Button(self.button_agent_frame, text="Back", font=("Comic Sans MS", 12), command=self.back_button_behavior, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.back_run.pack(pady=(5, 5))
 
     def back_button_behavior(self):
