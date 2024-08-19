@@ -203,11 +203,6 @@ class Agent:
             self.state.act('HEAL')
             return
 
-        if 'P_G' in tmp:
-            self.update_map_explored('-1')
-        else:
-            self.update_map_explored('0')
-
         if 'W_H' in tmp:
             if self.kb.is_there_poison(next[0], next[1]):
                 self.visited.add(next)
