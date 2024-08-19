@@ -138,21 +138,21 @@ class Agent:
 
     def move(self):
         next, neighbors = self.state.get_forward_and_neighbors()
+        tmp = self.get_env_info()
         
         if self.is_scream():
             self.state.act('SHOOT')
             self.prev_action = 'SHOOT'
             self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
-            if 'S' not in self.get_env_info():
-                while self.kb.is_there_wumpus(next[0], next[1]):
-                    self.kb.assertNoWumpusPostShoot(next[0], next[1])
+            # if 'S' not in self.get_env_info():
+            #     while self.kb.is_there_wumpus(next[0], next[1]):
+            #         self.kb.assertNoWumpusPostShoot(next[0], next[1])
             return
         elif self.prev_action == 'SHOOT':
             self.prev_action = None
             while self.kb.is_there_wumpus(next[0], next[1]):
                 self.kb.assertNoWumpusPostShoot(next[0], next[1])
 
-        tmp = self.get_env_info()
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
 
         if self.state.agent_health == 25 and 'W_H' in tmp and self.state.agent_number_of_HL > 0:
@@ -161,31 +161,38 @@ class Agent:
 
         self.update_map_explored('0')
 
-        if 'W_H' in tmp:
-            if self.kb.is_there_poison(next[0], next[1]):
-                self.visited.add(next)
-
-        if self.pending_actions != []:
-            if 'S' not in tmp and 'B' not in tmp:
-                self.__add_safe_position(neighbors)
-            if 'G' in tmp or 'H_P' in tmp:
-                self.state.act('GRAB')
-                if 'H_P' in tmp:
-                    self.prev_action = 'GRAB_H_P'
-                return
-            self.state.act(self.pending_actions.pop(0))
-            return
-        
-        if 'G' in tmp or 'H_P' in tmp:
-            self.state.act('GRAB')
-            if 'H_P' in tmp:
-                self.prev_action = 'GRAB_H_P'
-            return
-        
+        # if 'W_H' in tmp:
+        #     if self.kb.is_there_poison(next[0], next[1]):
+        #         self.visited.add(next)
         if self.prev_action == 'GRAB_H_P':
             self.prev_action = None
             while self.kb.is_there_healing(self.state.position[0], self.state.position[1]):
                 self.kb.assertNoHealingPostGrab(self.state.position[0], self.state.position[1])
+
+        if self.pending_actions != []:
+            if 'S' not in tmp and 'B' not in tmp:
+                self.__add_safe_position(neighbors)
+            
+            if 'H_P' in tmp:
+                self.state.act('GRAB')
+                self.prev_action = 'GRAB_H_P'
+                return
+            
+            if 'G' in tmp:
+                self.state.act('GRAB')
+                return
+
+            self.state.act(self.pending_actions.pop(0))
+            return
+        
+        if 'H_P' in tmp:
+            self.state.act('GRAB')
+            self.prev_action = 'GRAB_H_P'
+            return
+        
+        if 'G' in tmp:
+            self.state.act('GRAB')
+            return
         
         if next == False:
             self.state.act('TURN_RIGHT')

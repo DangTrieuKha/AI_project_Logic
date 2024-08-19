@@ -161,16 +161,16 @@ class AgentKB:
             # add R_G
             self.add_single_clause(self.pos_literal_reliable_glow(x,y))
         else:
-            #add not G
-            self.add_single_clause(self.neg_literal_glow(x,y))
-            # add R_G
-            self.add_single_clause(self.pos_literal_reliable_glow(x,y))
             # add not H
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
                     self.add_single_clause(self.neg_literal_healing(x_new, y_new))
+            #add not G
+            self.add_single_clause(self.neg_literal_glow(x,y))
+            # add R_G
+            self.add_single_clause(self.pos_literal_reliable_glow(x,y))
 
         if 'P' in percepts:
             self.add_single_clause(self.pos_literal_pit(x,y))

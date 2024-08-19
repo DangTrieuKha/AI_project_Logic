@@ -86,25 +86,29 @@ class Program:
         direction = self.agent_state.direction
         if self.agent_state.actions['GRAB']:
             adjacent = self.get_adjacent_cells(x_map,y_map)
-            if 'G' in self.map[x_map][y_map]:
-                self.map[x_map][y_map].remove('G')
-                if self.map[x_map][y_map] == []:
-                    self.map[x_map][y_map] = ['-']
-                return
-
             if 'H_P' in self.map[x_map][y_map]:
                 self.map[x_map][y_map].remove('H_P')
                 if self.map[x_map][y_map] == []:
                     self.map[x_map][y_map] = ['-']
                 
-                if 'H_P' in self.map[x_map][y_map]:
-                    return
-                
                 for i_x, i_y in adjacent:
                     if 'G_L' in self.map[i_x][i_y]:
-                        self.map[i_x][i_y].remove('G_L')
+                        adjacent_gl = self.get_adjacent_cells(i_x, i_y)
+                        check_not_gl = True
+                        for cell_x,cell_y in adjacent_gl:
+                            if 'H_P' in self.map[cell_x][cell_y]:
+                                check_not_gl = False
+                        if check_not_gl:
+                            self.map[i_x][i_y].remove('G_L')
 
                 self.agent_state.agent_number_of_HL += 1
+                return
+            
+            if 'G' in self.map[x_map][y_map]:
+                self.map[x_map][y_map].remove('G')
+                if self.map[x_map][y_map] == []:
+                    self.map[x_map][y_map] = ['-']
+                self.update_score(5000)
                 return
 
         elif self.agent_state.actions['SHOOT']:
@@ -175,8 +179,6 @@ class Program:
             self.agent_state.actions['SHOOT'] = False
         elif actions['GRAB']:
             self.update_score(-10)
-            if 'G' in self.map[10 - self.agent_state.get_position()[1]][self.agent_state.get_position()[0] - 1]:
-                self.update_score(5000)
             self.update_map()
             self.agent_state.actions['GRAB'] = False
         elif actions['TURN_LEFT']:
