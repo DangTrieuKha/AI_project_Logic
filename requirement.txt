@@ -3,3 +3,8 @@ pysat
 python-sat
 tkinter
 tk
+os
+copy
+pygame
+threading
+itertools
