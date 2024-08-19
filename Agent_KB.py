@@ -103,7 +103,6 @@ class AgentKB:
         if 'S' in percepts:
             # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
             tmp = [self.neg_literal_reliable_stench(x,y),self.neg_literal_stench(x,y)]
-            tmp = []
             
             for k in range(4):
                 x_new = x + dx[k]
