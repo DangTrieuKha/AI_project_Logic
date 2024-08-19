@@ -181,10 +181,6 @@ class Agent:
                     print((x,y), 'do not have healing')
 
     def move(self):
-        if self.state.agent_health == 25:
-            self.state.act('HEAL')
-            return
-        
         next, neighbors = self.state.get_forward_and_neighbors()
         
         if self.is_scream():
@@ -202,6 +198,10 @@ class Agent:
 
         tmp = self.get_env_info()
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
+
+        if self.state.agent_health == 25 and 'W_H' in tmp:
+            self.state.act('HEAL')
+            return
 
         if 'P_G' in tmp:
             self.update_map_explored('-1')
