@@ -11,7 +11,7 @@ class Agent:
         self.pending_position = {(1, 2)}
         self.pending_actions = []
         self.map_explored = [['-1' for _ in range(10)] for _ in range(10)]
-        self.visited = {(1, 1)}    # = set(): Set of visited positions
+        self.visited = {(1, 1)}
         self.turn_count = 0
         self.prev_action = None
 
@@ -55,14 +55,9 @@ class Agent:
         return None
 
     def __get_path(self, start, goal):
-        # for line in self.map_explored:
-        #     print(line)
-        # print(self.pending_position)
-        # print(start, goal)
         result = self.__iterative_deepening_search(start, goal)
         if result is not None:
             result.reverse()
-        # print(result)
         return result
 
     def __path_to_actions(self, path):
@@ -140,45 +135,6 @@ class Agent:
             self.update_map_explored('0', neighbor[0], neighbor[1])
             if neighbor not in self.visited:
                 self.pending_position.add(neighbor)
-
-    def debug(self, tmp):
-        # # #[DEBUG ONLY, COMMENT OR DELETE WHEN DONE]
-        # print(self.kb.kb.clauses)
-        print((self.state.position[0], self.state.position[1]), 'have percept: ', tmp)
-        if self.kb.is_there_stench(self.state.position[0],self.state.position[1]):
-            print((self.state.position[0],self.state.position[1]), 'have stench')
-        else:
-            print((self.state.position[0],self.state.position[1]), 'do not have stench')
-        dx = [0, 1, 0, -1]
-        dy = [1, 0, -1, 0]
-        for i in range(4):
-            x = self.state.position[0] + dx[i]
-            y = self.state.position[1] + dy[i]
-            if x >= 1 and x <=10 and y >= 1 and y<= 10:
-                if self.kb.is_there_stench(x,y):
-                    print((x,y), 'have stench')
-                else:
-                    print((x,y), 'do not have stench')
-
-                if self.kb.is_there_wumpus(x,y):
-                    print((x,y), 'have wumpus')
-                else:
-                    print((x,y), 'do not have wumpus')
-
-                if self.kb.is_there_pit(x,y):
-                    print((x,y), 'have pit')
-                else:
-                    print((x,y), 'do not have pit')
-                
-                if self.kb.is_there_glow(x,y):
-                    print((x,y), 'have glow')
-                else:
-                    print((x,y), 'do not have glow')
-                
-                if self.kb.is_there_healing(x,y):
-                    print((x,y), 'have healing')
-                else:
-                    print((x,y), 'do not have healing')
 
     def move(self):
         next, neighbors = self.state.get_forward_and_neighbors()
@@ -264,10 +220,6 @@ class Agent:
             if self.__move_to_safe_position():
                 return
 
-            # self.state.act('SHOOT')
-            # self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
-            # self.pending_actions = ['MOVE_FORWARD']
-
         elif self.kb.is_there_not_wumpus(next_x, next_y):
             if self.kb.is_there_not_pit(next_x, next_y):
                 self.state.act('MOVE_FORWARD')
@@ -285,10 +237,6 @@ class Agent:
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
                 self.pending_actions = ['MOVE_FORWARD']
                 return
-
-            # if 'G_L' in tmp:
-            #     # Implement logic to go around to grab the healing potion
-            #     return
 
         self.__climb_out()
 
