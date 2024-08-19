@@ -86,6 +86,12 @@ class Program:
         direction = self.agent_state.direction
         if self.agent_state.actions['GRAB']:
             adjacent = self.get_adjacent_cells(x_map,y_map)
+            if 'G' in self.map[x_map][y_map]:
+                self.map[x_map][y_map].remove('G')
+                if self.map[x_map][y_map] == []:
+                    self.map[x_map][y_map] = ['-']
+                return
+
             if 'H_P' in self.map[x_map][y_map]:
                 self.map[x_map][y_map].remove('H_P')
                 if self.map[x_map][y_map] == []:
@@ -97,14 +103,8 @@ class Program:
                 for i_x, i_y in adjacent:
                     if 'G_L' in self.map[i_x][i_y]:
                         self.map[i_x][i_y].remove('G_L')
-
                 return
-            
-            if 'G' in self.map[x_map][y_map]:
-                self.map[x_map][y_map].remove('G')
-                if self.map[x_map][y_map] == []:
-                    self.map[x_map][y_map] = ['-']
-    
+
         elif self.agent_state.actions['SHOOT']:
             if direction == 'UP':
                 x_wumpus = x_map - 1
