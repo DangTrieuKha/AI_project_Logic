@@ -156,12 +156,12 @@ class Agent:
             self.state.act('HEAL')
             return
 
-        self.update_map_explored('0')
-
         if self.prev_action == 'GRAB_H_P':
             self.prev_action = None
             while self.kb.is_there_healing(self.state.position[0], self.state.position[1]):
                 self.kb.assertNoHealingPostGrab(self.state.position[0], self.state.position[1])
+
+        self.update_map_explored('0')
 
         if self.pending_actions != []:
             if 'S' not in env_info and 'B' not in env_info:
