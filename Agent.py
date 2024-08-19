@@ -279,15 +279,15 @@ class Agent:
             if self.__move_to_safe_position():
                 return
         else:
+            if 'B' in tmp:
+                if self.__move_to_safe_position():
+                    return
+                
             if 'S' in tmp:
                 self.state.act('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
                 self.pending_actions = ['MOVE_FORWARD']
                 return
-            
-            if 'B' in tmp:
-                if self.__move_to_safe_position():
-                    return
 
             # if 'G_L' in tmp:
             #     # Implement logic to go around to grab the healing potion
