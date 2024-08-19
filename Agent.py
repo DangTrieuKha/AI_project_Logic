@@ -58,11 +58,14 @@ class Agent:
             print(line)
         print(self.pending_position)
         print(start, goal)
-        result = self.__iterative_deepening_search(start, goal)[::-1]
+        result = self.__iterative_deepening_search(start, goal)
+        result = result.reverse() if result is not None else None
         print(result)
         return result
 
     def __path_to_actions(self, path):
+        if path is None:
+            return []
         actions = []
         current_direction = self.state.direction
         for i in range(len(path) - 1):
