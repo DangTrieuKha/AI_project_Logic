@@ -1,1 +1,0 @@
-Position: (1, 1), Direction: UP, Actions: CLIMB, Score: 0
