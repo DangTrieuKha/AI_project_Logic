@@ -166,7 +166,6 @@ class Program:
     def run(self):
         self.scream = False
         actions = self.agent_state.get_actions()
-        self.result.append(f"Position: {self.agent_state.get_prev_position()}, Direction: {self.agent_state.get_direction()}, Actions: {[action for action, value in actions.items() if value][0]}, Score: {self.agent_score}")
         if actions['CLIMB']:
             self.update_score(10)
             return self.end_game()
@@ -187,9 +186,10 @@ class Program:
         elif actions['TURN_RIGHT']:
             self.update_score(-10)
             self.agent_state.actions['TURN_RIGHT'] = False
+        
+        self.result.append(f"Position: {self.agent_state.get_prev_position()}, Direction: {self.agent_state.get_direction()}, Actions: {[action for action, value in actions.items() if value][0]}, Score: {self.agent_score}")
 
         x, y = self.agent_state.get_position()
-        # print(self.map[10 - y][x - 1])
 
         if 'W' in self.map[10 - y][x - 1] or 'P' in self.map[10 - y][x - 1]:
             self.update_score(-10000)

@@ -144,9 +144,6 @@ class Agent:
             self.state.act('SHOOT')
             self.prev_action = 'SHOOT'
             self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
-            # if 'S' not in self.get_env_info():
-            #     while self.kb.is_there_wumpus(next[0], next[1]):
-            #         self.kb.assertNoWumpusPostShoot(next[0], next[1])
             return
         elif self.prev_action == 'SHOOT':
             self.prev_action = None
@@ -161,9 +158,6 @@ class Agent:
 
         self.update_map_explored('0')
 
-        # if 'W_H' in tmp:
-        #     if self.kb.is_there_poison(next[0], next[1]):
-        #         self.visited.add(next)
         if self.prev_action == 'GRAB_H_P':
             self.prev_action = None
             while self.kb.is_there_healing(self.state.position[0], self.state.position[1]):
