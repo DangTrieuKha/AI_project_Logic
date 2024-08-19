@@ -52,6 +52,7 @@ class Agent:
             if result is not None:
                 return result
             limit += 1
+        return None
 
     def __get_path(self, start, goal):
         for line in self.map_explored:
@@ -59,7 +60,8 @@ class Agent:
         print(self.pending_position)
         print(start, goal)
         result = self.__iterative_deepening_search(start, goal)
-        result = result.reverse() if result is not None else None
+        if result is not None:
+            result.reverse()
         print(result)
         return result
 
@@ -120,6 +122,28 @@ class Agent:
         self.pending_actions.append('CLIMB')
         self.run()
 
+    def __move_to_safe_position(self):
+        if self.pending_position != set():
+            position = list(self.pending_position)[-1]
+            self.pending_position.remove(position)
+            path = self.__get_path(self.state.position, position)
+            actions = self.__path_to_actions(path)
+            self.pending_actions = actions
+            self.run()
+            return True
+        
+        return False
+        
+    def __add_safe_position(self, neighbors):
+        for neighbor in neighbors:
+            if self.is_explored(neighbor[0], neighbor[1]):
+                continue
+            if self.kb.is_there_poison(neighbor[0], neighbor[1]) or not self.kb.is_there_not_poison(neighbor[0], neighbor[1]):
+                continue
+            self.update_map_explored('0', neighbor[0], neighbor[1])
+            if neighbor not in self.visited:
+                self.pending_position.add(neighbor)
+
     def debug(self, tmp):
         # # #[DEBUG ONLY, COMMENT OR DELETE WHEN DONE]
         # print(self.kb.kb.clauses)
@@ -164,29 +188,41 @@ class Agent:
             self.state.act('HEAL')
             return
         
+        next, neighbors = self.state.get_forward_and_neighbors()
+        
         if self.is_scream():
             self.state.act('SHOOT')
             self.prev_action = 'SHOOT'
             self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+            if 'S' not in self.get_env_info():
+                while self.kb.is_there_wumpus(next[0], next[1]):
+                    self.kb.assertNoWumpusPostShoot(next[0], next[1])
             return
         elif self.prev_action == 'SHOOT':
             self.prev_action = None
-            forward = self.state.get_forward_location()
-            self.kb.assertNoWumpusPostShoot(forward[0], forward[1])
+            while self.kb.is_there_wumpus(next[0], next[1]):
+                self.kb.assertNoWumpusPostShoot(next[0], next[1])
 
         tmp = self.get_env_info()
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
-        with open("example.txt", "w") as file:
-                for clause in self.kb.kb:
-                    file.write(f"{clause}\n")
-                file.write('----------------------\n')
 
         if 'P_G' in tmp:
             self.update_map_explored('-1')
         else:
             self.update_map_explored('0')
 
+        if 'W_H' in tmp:
+            if self.kb.is_there_poison(next[0], next[1]):
+                self.visited.add(next)
+
         if self.pending_actions != []:
+            if 'S' not in tmp and 'B' not in tmp:
+                self.__add_safe_position(neighbors)
+            if 'G' in tmp or 'H_P' in tmp:
+                self.state.act('GRAB')
+                if 'H_P' in tmp:
+                    self.prev_action = 'GRAB_H_P'
+                return
             self.state.act(self.pending_actions.pop(0))
             return
         
@@ -198,24 +234,14 @@ class Agent:
         
         if self.prev_action == 'GRAB_H_P':
             self.prev_action = None
-            self.kb.assertNoHealingPostGrab(self.state.position[0], self.state.position[1])
-        
-        next, neighbors = self.state.get_forward_and_neighbors()
-        print(f"Position: {self.state.position}, Next: {next}, Neighbors: {neighbors}")
+            while self.kb.is_there_healing(self.state.position[0], self.state.position[1]):
+                self.kb.assertNoHealingPostGrab(self.state.position[0], self.state.position[1])
         
         if next == False:
             self.state.act('TURN_RIGHT')
             return
         elif next in self.visited:
-            if self.pending_position != set():
-                print("It's here")
-                position = list(self.pending_position)[-1]
-                self.pending_position.remove(position)
-                path = self.__get_path(self.state.position, position)
-                actions = self.__path_to_actions(path)
-                cost = self.__evaluate_cost(actions)
-                self.pending_actions = actions
-                self.run()
+            if self.__move_to_safe_position():
                 return
             
             self.turn_count += 1
@@ -226,20 +252,10 @@ class Agent:
             return
         else:
             self.turn_count = 0
-        
-        if self.state.position == (6, 4):
-            print(tmp)
 
         if 'S' not in tmp and 'B' not in tmp:
             self.state.act('MOVE_FORWARD')
-            for neighbor in neighbors:
-                if self.is_explored(neighbor[0], neighbor[1]):
-                    continue
-                
-                self.update_map_explored('0', neighbor[0], neighbor[1])
-
-                if neighbor not in self.visited:
-                    self.pending_position.add(neighbor)
+            self.__add_safe_position(neighbors)
             return
         
         next_x, next_y = next
@@ -248,72 +264,33 @@ class Agent:
             if self.kb.is_there_not_pit(next_x, next_y):
                 self.state.act('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
-                # with open("example.txt", "w") as file:
-                #     for clause in self.kb.kb:
-                #         file.write(f"{clause}\n")
-                #     file.write('----------------------\n')
                 self.pending_actions = ['MOVE_FORWARD']
                 return
 
-            if self.pending_position != set():
-                position = list(self.pending_position)[-1]
-                self.pending_position.remove(position)
-                path = self.__get_path(self.state.position, position)
-                actions = self.__path_to_actions(path)
-                cost = self.__evaluate_cost(actions)
-
-            if cost < 110:
-                self.pending_actions = actions
-                self.run()
+            if self.__move_to_safe_position():
                 return
-            else:
-                self.state.act('SHOOT')
-                self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
-                # with open("example.txt", "w") as file:
-                #     for clause in self.kb.kb:
-                #         file.write(f"{clause}\n")
-                #     file.write('----------------------\n')
-                # with open("example.txt", "w") as file:
-                #     file.write(self.kb.kb)
-                self.pending_actions = ['MOVE_FORWARD']
+
+            # self.state.act('SHOOT')
+            # self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+            # self.pending_actions = ['MOVE_FORWARD']
 
         elif self.kb.is_there_not_wumpus(next_x, next_y):
             if self.kb.is_there_not_pit(next_x, next_y):
                 self.state.act('MOVE_FORWARD')
                 return
             
-            if self.pending_position != set():
-                position = list(self.pending_position)[-1]
-                self.pending_position.remove(position)
-                path = self.__get_path(self.state.position, position)
-                actions = self.__path_to_actions(path)
-                cost = self.__evaluate_cost(actions)
-
-                self.pending_actions = actions if actions is not None else []
-                self.run()
+            if self.__move_to_safe_position():
                 return
         else:
             if 'S' in tmp:
                 self.state.act('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
-                # with open("example.txt", "w") as file:
-                #     for clause in self.kb.kb:
-                #         file.write(f"{clause}\n")
-                #     file.write('----------------------\n')
                 self.pending_actions = ['MOVE_FORWARD']
                 return
             
             if 'B' in tmp:
-                if self.pending_position != set():
-                    position = list(self.pending_position)[-1]
-                    self.pending_position.remove(position)
-                    path = self.__get_path(self.state.position, position)
-                    actions = self.__path_to_actions(path)
-                    cost = self.__evaluate_cost(actions)
-
-                self.pending_actions = actions
-                self.run()
-                return
+                if self.__move_to_safe_position():
+                    return
 
             # if 'G_L' in tmp:
             #     # Implement logic to go around to grab the healing potion
