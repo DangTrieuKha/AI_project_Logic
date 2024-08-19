@@ -186,6 +186,20 @@ class App:
         x_m, y_m = 10 - y, x - 1
         self.draw_element_i(x_m, y_m, self.program.map[x_m][y_m], 0, self.agentKB_canvas)
             
+    def draw_Explain(self, frame):
+        Image = [("Agent", self.player_image_down), ("Gold", self.gold_image), ("Wumpus", self.wumpus_image), ("Pit", self.pit_image), ("Poison Gas", self.poison_image), ("Healing Potion", self.healing_poison_image)]
+        for description, image in Image:
+            # Tạo một frame con cho mỗi hàng
+            row_frame = tk.Frame(frame)
+            row_frame.pack(fill='x', pady=(5, 5), anchor='w')  # fill='x' để row_frame lấp đầy chiều ngang
+
+            # Hiển thị text
+            img_label = tk.Label(row_frame, image = image)
+            img_label.pack(side='left', padx=(0, 0), anchor='w')
+
+            # Hiển thị image
+            label = tk.Label(row_frame, text=description, font=("Arial", 12))
+            label.pack(side='left', padx=(20, 0), anchor='w')
 
     def on_entry_click(self, event):
         if self.entry.get() == self.default_input_text:
@@ -283,11 +297,16 @@ class App:
         rows = len(self.program.map)
         cols = len(self.program.map[0])
         
-        self.canvas = Canvas(self.map_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
-        self.canvas.pack(pady=(10, 10))
+        self.display_frame = tk.Frame(self.map_frame)
+        self.display_frame.pack(pady=(8, 5))
+        
+        self.canvas = Canvas(self.display_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
+        self.canvas.pack(side='left', padx=(50, 20), pady=(5, 5))
 
         self.draw_grid(canvas=self.canvas)
         self.draw_elements(canvas=self.canvas, mode=1)
+
+        self.draw_Explain(self.display_frame)
 
         self.button_frame = tk.Frame(self.map_frame)
         self.button_frame.pack(pady=(10, 10))
@@ -308,25 +327,44 @@ class App:
         cols = len(self.program.map[0])
 
         self.map_environment_frame = tk.Frame(self.map_agent_frame)
-        self.map_environment_frame.pack(pady=(8, 5), fill='x')
+        self.map_environment_frame.pack(pady=(5, 5), fill='x')
 
-        self.left_label = tk.Label(self.map_environment_frame, text="Environment", font=("Arial", 16))
-        self.left_label.pack(side='left', padx=(0, 0), expand=True)
+        self.left_label = tk.Label(self.map_environment_frame, text="ENVIRONMENT", font=("Arial", 16))
+        self.left_label.pack(side='left', padx=(0, 50), expand=True)
 
-        self.right_label = tk.Label(self.map_environment_frame, text="Knowledge base", font=("Arial", 16))
-        self.right_label.pack(side='right', padx=(0, 0), expand=True)
+        self.right_label = tk.Label(self.map_environment_frame, text="KNOWLEDGE BASE", font=("Arial", 16))
+        self.right_label.pack(side='right', padx=(0, 150), expand=True)
 
+        self.infor_frame = tk.Frame(self.map_agent_frame)
+        self.infor_frame.pack(pady=(0, 0), fill='x')
 
-        self.score_label = tk.Label(self.map_agent_frame, text=f"Score: {self.program.get_score}", font=("Arial", 14), bg="white", width=20, height=1)
-        self.score_label.pack()
+        self.score_label = tk.Label(self.infor_frame, text=f"SCORE: {self.program.get_score}", font=("Arial", 14), fg="green")#, bg="white", width=10, height=1)
+        self.score_label.pack(side='left', padx=(20, 50), expand=True)
         self.score_label.config(text=f"Score: {self.program.get_score()}")
 
-        self.health_label = tk.Label(self.map_agent_frame, text=f"Health: {self.program.agent_state.get_health}", font=("Arial", 14), bg="white", width=20, height=1)
-        self.health_label.pack()
+        self.heal_frame = tk.Frame(self.infor_frame)
+        self.heal_frame.pack(side='right', padx=(0, 370))
+
+        self.health_label = tk.Label(self.heal_frame, text=f"Health: {self.program.agent_state.get_health}", font=("Arial", 14), fg = "red") #,bg="white", width=30, height=1)
+        self.health_label.pack(side='left', padx=(0, 200), expand=True)
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
 
+
+        row_frame = tk.Frame(self.heal_frame)
+        row_frame.pack(fill='x', pady=(5, 5), anchor='w')  # fill='x' để row_frame lấp đầy chiều ngang
+
+            # Hiển thị text
+        img_label = tk.Label(row_frame, image = self.healing_poison_image)
+        img_label.pack(side='left', padx=(0, 0), expand=True)
+
+        numbers = self.program.agent_state.get_number_of_HL()
+            # Hiển thị image
+        self.number_of_HL = tk.Label(row_frame, text=f"{numbers}", font=("Arial", 14))
+        self.number_of_HL.pack(side='left',padx=(5, 0), anchor='w')
+            
+
         self.run_frame = tk.Frame(self.map_agent_frame)
-        self.run_frame.pack(pady=(5, 5))
+        self.run_frame.pack(pady=(5, 10))
         
         # vẽ map của program
         self.program_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='white')
@@ -339,7 +377,7 @@ class App:
 
         # vẽ map của KB
         self.agentKB_canvas = Canvas(self.run_frame, width=cols * self.cell_size, height=rows * self.cell_size, background='gray')
-        self.agentKB_canvas.pack(side='left', padx=(10, 5), pady=(5, 5))
+        self.agentKB_canvas.pack(side='left', padx=(10, 10), pady=(5, 5))
         self.draw_grid(self.agentKB_canvas)
         # màu = "white" thay vì "green"
         self.update_grid(self.agent.state.get_position()[0], self.agent.state.get_position()[1], "white", self.agentKB_canvas)
@@ -353,35 +391,38 @@ class App:
         # self.draw_agentKB(self.agent.state, self.agentKB_canvas)
         self.draw_agent(self.agent.state, self.agentKB_canvas)
 
+        #Image
+        self.draw_Explain(self.run_frame)
+
         # action
         action = self.action()
-        self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Arial", 14), bg="white", width=30, height=2)   
+        self.action_label = tk.Label(self.map_agent_frame, text=f"Action: {action}", font=("Courier New", 14), bg="white", width=25, height=2)   
         self.action_label.pack()
         self.action_label.config(text=f"Action: {action}")
 
         self.button_frame_step_2 = tk.Frame(self.map_agent_frame)
-        self.button_frame_step_2.pack(pady=(10, 10))
+        self.button_frame_step_2.pack(pady=(10, 5))
         self.next_step_button = tk.Button(self.button_frame_step_2, text="Next Step", command=self.next_step, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.next_step_button.pack(side = tk.LEFT ,padx=(0, 3))
         self.auto_run_button = tk.Button(self.button_frame_step_2, text="Auto Run", command=self.auto_run, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.auto_run_button.pack(side = tk.RIGHT, padx=(8, 10))
 
         self.button_agent_frame = tk.Frame(self.map_agent_frame)
-        self.button_agent_frame.pack(pady=(10, 10))
+        self.button_agent_frame.pack(pady=(10, 5))
 
         self.back_run = tk.Button(self.button_agent_frame, text="Back", command=self.back_button_behavior, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.back_run.pack(pady=(5, 5))
 
     def back_button_behavior(self):
         self.auto_running = False  # Tắt auto_run khi người dùng quay lại
-        if self.program.run() == "Finished":
-            # nếu chạy self.program.run để lấy trạng thái kết thúc game
-            # thì sẽ bị tăng thêm 10đ do CLIMB
-            # nên cần trừ đi 10đ
-            self.program.update_score(-10) 
-            return self.show_end_frame()
-        else:
-            return self.show_main_frame()
+        # if self.program.run() == "Finished":
+        #     # nếu chạy self.program.run để lấy trạng thái kết thúc game
+        #     # thì sẽ bị tăng thêm 10đ do CLIMB
+        #     # nên cần trừ đi 10đ
+        #     self.program.update_score(-10) 
+        #     return self.show_end_frame()
+        # else:
+        return self.show_main_frame()
 
     def show_end_frame(self):
         self.hidden_all_frame()
@@ -430,6 +471,7 @@ class App:
         
         self.score_label.config(text=f"Score: {self.program.get_score()}")
         self.health_label.config(text=f"Health: {self.program.agent_state.get_health()}")
+        self.number_of_HL.config(text=f"{self.program.agent_state.get_number_of_HL()}")
         
         # for i in range(rows):
         #     print(self.program.map[i])
