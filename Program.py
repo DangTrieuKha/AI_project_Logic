@@ -172,21 +172,16 @@ class Program:
             return self.end_game()
         elif actions['MOVE_FORWARD']:
             self.update_score(-10)
-            self.agent_state.actions['MOVE_FORWARD'] = False
         elif actions['SHOOT']:
             self.update_score(-100)
             self.update_map()
-            self.agent_state.actions['SHOOT'] = False
         elif actions['GRAB']:
             self.update_score(-10)
             self.update_map()
-            self.agent_state.actions['GRAB'] = False
         elif actions['TURN_LEFT']:
             self.update_score(-10)
-            self.agent_state.actions['TURN_LEFT'] = False
         elif actions['TURN_RIGHT']:
             self.update_score(-10)
-            self.agent_state.actions['TURN_RIGHT'] = False
 
         x, y = self.agent_state.get_position()
 
@@ -199,5 +194,8 @@ class Program:
         
         if 'P_G' in self.map[10 - y][x - 1]:
             self.agent_state.poison()
+        
+        for key in actions.keys():
+            self.agent_state.actions[key] = False
         
         return False
