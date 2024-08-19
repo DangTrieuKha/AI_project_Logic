@@ -163,6 +163,10 @@ class Agent:
         if self.is_scream():
             self.state.act('SHOOT')
             self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+            with open("example.txt", "w") as file:
+                for clause in self.kb.kb:
+                    file.write(f"{clause}\n")
+                file.write('----------------------\n')
             # self.debug(self.get_env_info())
             return
 
@@ -172,6 +176,10 @@ class Agent:
 
         tmp = self.get_env_info()
         self.kb.tell(tmp, self.state.position[0], self.state.position[1])
+        with open("example.txt", "w") as file:
+                for clause in self.kb.kb:
+                    file.write(f"{clause}\n")
+                file.write('----------------------\n')
 
         if 'P_G' in tmp:
             self.update_map_explored('-1')
@@ -211,6 +219,10 @@ class Agent:
             if self.kb.is_there_not_pit(next_x, next_y):
                 self.state.act('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+                with open("example.txt", "w") as file:
+                    for clause in self.kb.kb:
+                        file.write(f"{clause}\n")
+                    file.write('----------------------\n')
                 self.pending_actions = ['MOVE_FORWARD']
                 return
 
@@ -228,6 +240,12 @@ class Agent:
             else:
                 self.state.act('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+                with open("example.txt", "w") as file:
+                    for clause in self.kb.kb:
+                        file.write(f"{clause}\n")
+                    file.write('----------------------\n')
+                with open("example.txt", "w") as file:
+                    file.write(self.kb.kb)
                 self.pending_actions = ['MOVE_FORWARD']
 
         elif self.kb.is_there_not_wumpus(next_x, next_y):
@@ -249,6 +267,10 @@ class Agent:
             if 'S' in tmp:
                 self.state.act('SHOOT')
                 self.kb.tell(self.get_env_info(), self.state.position[0], self.state.position[1])
+                with open("example.txt", "w") as file:
+                    for clause in self.kb.kb:
+                        file.write(f"{clause}\n")
+                    file.write('----------------------\n')
                 self.pending_actions = ['MOVE_FORWARD']
                 return
             

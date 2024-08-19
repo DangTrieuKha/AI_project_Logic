@@ -42,13 +42,17 @@ class AgentKB:
         #     return
 
         for k in self.kb.clauses:
-            if pos_clause in k:
-                new_clause = [lit for lit in k if lit != pos_clause]
-                if len(new_clause) == 1:
-                    if pos_clause in range(111, 211 + 1) or pos_clause in range(311, 411 + 1) or pos_clause in range(-411, -311 + 1) or pos_clause in range(-211, -111 + 1):
-                        new_clause = None
-                if new_clause:
-                    new_kb.append(new_clause)
+            if pos_clause in k and (pos_clause in range(411, 812) or pos_clause in range(-811,-412) or pos_clause in range(111, 211 + 1) or pos_clause in range(311, 411 + 1) or pos_clause in range(-411, -311 + 1) or pos_clause in range(-211, -111 + 1)) and len(k) == 1:
+                
+
+
+                # new_clause = [lit for lit in k if lit != pos_clause]
+                # if len(new_clause) == 1:
+                #     if pos_clause in range(111, 211 + 1) or pos_clause in range(311, 411 + 1) or pos_clause in range(-411, -311 + 1) or pos_clause in range(-211, -111 + 1):
+                #         new_clause = None
+                # if new_clause:
+                #     new_kb.append(new_clause)
+                continue
             else:
                 new_kb.append(k)
 
@@ -98,13 +102,16 @@ class AgentKB:
     
         if 'S' in percepts:
             # Stench tại (x, y) -> Wumpus tại (x-1, y) OR (x+1, y) OR (x, y-1) OR (x, y+1)
+            tmp = [self.neg_literal_reliable_stench(x,y),self.neg_literal_stench(x,y)]
             tmp = []
+            
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
                     #add (S and R_S) -> W
                     tmp.append(self.pos_literal_wumpus(x_new, y_new))
+           
                     
             self.add_clause(tmp)
             #add S
@@ -141,13 +148,15 @@ class AgentKB:
                 
                 
         if 'G_L' in percepts:
-            tmp = []
+            
+            tmp = [self.neg_literal_glow(x,y), self.neg_literal_reliable_glow(x,y)]
             for k in range(4):
                 x_new = x + dx[k]
                 y_new = y + dy[k]
                 if self.isValid(x_new,y_new):
                     # add (G and R_G) -> H, add G, add R_G
                     tmp.append(self.pos_literal_healing(x_new, y_new))
+            
                     
             self.add_clause(tmp)
             #add G
@@ -287,7 +296,6 @@ class AgentKB:
 
 
 # # Khởi tạo Agent KB
-# agent_kb = AgentKB()
 
 # # Thêm nhận thức: có Breeze tại ô (1,1)
 # agent_kb.tell('',1,1)
