@@ -7,3 +7,4 @@ copy
 pygame
 threading
 itertools
+timeit
